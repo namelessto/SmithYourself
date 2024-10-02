@@ -1,0 +1,8 @@
+D:\Projects\Stardew Mods\Smith\bin\Debug\net6.0\Smith.deps.json
+D:\Projects\Stardew Mods\Smith\bin\Debug\net6.0\Smith.dll
+D:\Projects\Stardew Mods\Smith\obj\Debug\net6.0\Smith.csproj.AssemblyReference.cache
+D:\Projects\Stardew Mods\Smith\obj\Debug\net6.0\Smith.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projects\Stardew Mods\Smith\obj\Debug\net6.0\Smith.AssemblyInfoInputs.cache
+D:\Projects\Stardew Mods\Smith\obj\Debug\net6.0\Smith.AssemblyInfo.cs
+D:\Projects\Stardew Mods\Smith\obj\Debug\net6.0\Smith.csproj.CoreCompileInputs.cache
+D:\Projects\Stardew Mods\Smith\obj\Debug\net6.0\Smith.dll

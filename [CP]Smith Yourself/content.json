@@ -1,0 +1,34 @@
+{
+  "Format": "2.3.0",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}.SmithAnvil",
+      "FromFile": "assets/SmithAnvil.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/BigCraftables",
+      "Entries": {
+        "{{ModId}}.SmithAnvil": {
+          "Name": "{{ModId}}.SmithAnvil",
+          "DisplayName": "Smith's Anvil",
+          "Description": "A simple anvil.\nYou can upgrade your tools with it.",
+          "Price": 0,
+          "IsLamp": false,
+          "Texture": "{{ModId}}.SmithAnvil"
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Mail",
+      "Entries": {
+        "{{ModId}}.ReceiveAnvil": "Found this tucked away in the guild's backroom and while you're not a blacksmith, I'm sure you can figure out how to upgrade your tools with it.^^^  -Marlon^^P.S. Let's keep this between us. No need for Clint to find out. %item bigobject {{ModId}}.SmithAnvil %%"
+      },
+      "When": {
+        "HasFlag": "guildMember"
+      }
+    }
+  ]
+}
