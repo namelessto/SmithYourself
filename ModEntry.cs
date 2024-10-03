@@ -116,6 +116,12 @@ namespace SmithYourself
             {
                 Monitor.Log("Minigame assets missing", LogLevel.Error);
             }
+            if (e.Button == SButton.G)
+            {
+                Game1.player.mailReceived.Remove("NamelessTo.SmithYourselfCP.ReceiveAnvil");
+                Monitor.Log("Mail removed", LogLevel.Alert);
+
+            }
 
         }
 
