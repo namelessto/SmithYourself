@@ -17,11 +17,13 @@ namespace SmithYourself
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
 
         Texture2D? minigameBarBackground;
+        public static IMonitor monitor;
         public static bool isMinigameOpen = false;
 
         public override void Entry(IModHelper helper)
         {
             // Register events
+            monitor = Monitor;
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
@@ -51,7 +53,7 @@ namespace SmithYourself
         {
             if (!Helper.ModRegistry.IsLoaded("NamelessTo.SmithYourselfCP"))
             {
-                Monitor.Log("CP component not loaded, please check your installation.", LogLevel.Error);
+                Monitor.Log("CP component missing.", LogLevel.Error);
             }
             else
             {
@@ -108,7 +110,7 @@ namespace SmithYourself
             }
             else
             {
-                Monitor.Log("Missing minigame assets", LogLevel.Error);
+                Monitor.Log("Minigame assets missing", LogLevel.Error);
             }
 
         }

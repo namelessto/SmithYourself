@@ -14,3 +14,4 @@ D:\Projects\Stardew Mods\SmithYourself\obj\Debug\net6.0\SmithYourself.AssemblyIn
 D:\Projects\Stardew Mods\SmithYourself\obj\Debug\net6.0\SmithYourself.AssemblyInfo.cs
 D:\Projects\Stardew Mods\SmithYourself\obj\Debug\net6.0\SmithYourself.csproj.CoreCompileInputs.cache
 D:\Projects\Stardew Mods\SmithYourself\obj\Debug\net6.0\SmithYourself.dll
+D:\Projects\Stardew Mods\SmithYourself\obj\Debug\net6.0\SmithYourself.sourcelink.json

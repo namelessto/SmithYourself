@@ -19,7 +19,6 @@ namespace SmithYourself
         private bool isRunning;
         private Vector2 barPosition;
         private readonly Texture2D barBackground;
-
         public bool IsRunning => isRunning;
 
         // Constructor
@@ -214,7 +213,6 @@ namespace SmithYourself
 
             int requiredBars = 5;
             int relevantSkillLevel = GetRelevantSkillLevel(toolData.ClassName);
-
             if (powerMeter >= (100 - relevantSkillLevel))
             {
                 requiredBars -= 1;
@@ -230,7 +228,7 @@ namespace SmithYourself
                 }
             }
 
-            if (indexOfBar >= 0 && requiredBars < Game1.player.Items[indexOfBar].Stack)
+            if (indexOfBar >= 0 && requiredBars <= Game1.player.Items[indexOfBar].Stack)
             {
                 Game1.player.Items[indexOfBar].Stack -= requiredBars;
             }
