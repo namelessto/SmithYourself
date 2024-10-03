@@ -1,0 +1,17 @@
+{
+  "tool.cant-upgrade1": "Cannot upgrade this tool. {{materialsMessage}}\n",
+  "tool.cant-upgrade2": "You can't upgrade that.",
+  "tool.missing-materials-default": "The tool is already at the highest upgrade level.",
+  "tool.missing-materials-type": "You need {{ItemAmount}} {{itemType}}.",
+  "tool.upgraded": "Your {{toolType}} was upgraded!",
+
+  "item.copper": "Copper Bars",
+  "item.iron": "Iron Bars",
+  "item.gold": "Gold Bars",
+  "item.iridium": "Iridium Bars",
+  "item.hoe": "Hoe",
+  "item.water-can": "Watering Can",
+  "item.axe": "Axe",
+  "item.pan": "Pan",
+  "item.pickaxe": "Pickaxe"
+}

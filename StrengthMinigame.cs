@@ -12,6 +12,7 @@ namespace SmithYourself
     internal class StrengthMinigame : IClickableMenu
     {
         // Game variables
+        IModHelper helper;
         private int powerMeter;
         private int maxPower;
         private int minPower;
@@ -24,6 +25,7 @@ namespace SmithYourself
         // Constructor
         public StrengthMinigame(Texture2D barBackgroundImage) : base()
         {
+            helper = ModEntry.helperInstance!;
             isRunning = true;
             maxPower = 100;
             minPower = 0;
@@ -69,7 +71,7 @@ namespace SmithYourself
             int calculatedBarHeight = (int)(powerMeter * (maxBarHeight / (float)maxPower) * scale);
 
             // Clamp bar height to ensure it stays between 0 and the maxBarHeight
-            int barHeight = Math.Clamp(calculatedBarHeight, 0, (int)(maxBarHeight * scale));
+            int barHeight = Math.Clamp(calculatedBarHeight, 0, maxBarHeight * scale);
 
             // Draw the background (20x62 image)
             b.Draw(
@@ -93,7 +95,7 @@ namespace SmithYourself
                 new Rectangle(
                     (int)(barPosition.X + (backgroundWidth - barWidth) / 2 * scale), // Center the bar horizontally
                     barStartY,               // Y-position, 6 pixels from the bottom, growing upwards
-                    (int)(barWidth * scale),  // Bar width
+                    barWidth * scale,  // Bar width
                     barHeight                // Bar height, proportional to powerMeter
                 ),
                 null,
@@ -104,7 +106,6 @@ namespace SmithYourself
                 1f
             );
 
-            // Call base draw and mouse draw
             base.draw(b);
             drawMouse(b);
         }
@@ -113,13 +114,12 @@ namespace SmithYourself
         {
             if (!isRunning) return;
 
-            // Update powerMeter value (increase or decrease)
             if (isIncreasing)
             {
                 powerMeter += 2;
                 if (powerMeter >= maxPower)
                 {
-                    isIncreasing = false; // Start decreasing when max power is reached
+                    isIncreasing = false;
                 }
             }
             else
@@ -127,7 +127,7 @@ namespace SmithYourself
                 powerMeter -= 2;
                 if (powerMeter <= minPower)
                 {
-                    isIncreasing = true; // Start increasing when min power is reached
+                    isIncreasing = true;
                 }
             }
 
@@ -136,21 +136,17 @@ namespace SmithYourself
 
         public override void receiveKeyPress(Keys key)
         {
-            // Check if the minigame is currently open
             if (ModEntry.isMinigameOpen)
             {
-                // Handle key presses specifically for the minigame here
-                // For example, you might want to exit the minigame or process other inputs
                 if (Game1.options.doesInputListContain(Game1.options.menuButton, key) && readyToClose())
                 {
-                    // Close the minigame
-                    ModEntry.isMinigameOpen = false; // Make sure to update the status
-                    exitThisMenu(); // Assuming this closes the minigame
-                    return; // Exit early to avoid processing other key actions
+
+                    ModEntry.isMinigameOpen = false;
+                    exitThisMenu();
+                    return;
                 }
             }
 
-            // Continue with the rest of the key handling
             if (key != 0)
             {
                 if (Game1.options.doesInputListContain(Game1.options.menuButton, key) && readyToClose())
@@ -187,8 +183,6 @@ namespace SmithYourself
                     break;
             }
 
-            // Game1.addHUDMessage(new HUDMessage($"You hit the strength meter at {powerMeter} power!"));
-
             UpgradeTool(currentTool, powerMeter);
             isRunning = false;
             Game1.exitActiveMenu();
@@ -203,7 +197,8 @@ namespace SmithYourself
             }
 
             ToolData toolData = tool.GetToolData();
-            string toolClass = toolData.ClassName.Contains("Can") ? "Watering can" : toolData.ClassName;
+            string toolClassKey = toolData.ClassName.Contains("Can") ? "item.water-can" : $"item.{toolData.ClassName.ToLower()}";
+            string toolClass = helper.Translation.Get(toolClassKey);
             string barName;
             string barID = GetRequiredBarIDForToolUpgrade(tool.UpgradeLevel, out barName);
             string newItemId = barName + toolData.ClassName;
@@ -236,7 +231,7 @@ namespace SmithYourself
             Game1.player.removeItemFromInventory(tool);
             Game1.player.addItemToInventory(newTool);
 
-            HUDMessage Message = HUDMessage.ForCornerTextbox($"Your {toolClass} was upgraded!");
+            HUDMessage Message = HUDMessage.ForCornerTextbox(helper.Translation.Get("tool.upgraded", new { toolType = toolClass }));
             Game1.addHUDMessage(Message);
         }
 

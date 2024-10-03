@@ -17,13 +17,15 @@ namespace SmithYourself
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
 
         Texture2D? minigameBarBackground;
-        public static IMonitor monitor;
+        public static IMonitor? monitor;
+        public static IModHelper? helperInstance;
         public static bool isMinigameOpen = false;
 
         public override void Entry(IModHelper helper)
         {
             // Register events
             monitor = Monitor;
+            helperInstance = helper;
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
@@ -97,14 +99,16 @@ namespace SmithYourself
                         }
                         else
                         {
-                            HUDMessage Message = HUDMessage.ForCornerTextbox($"Cannot upgrade tool.\n{missingMaterials}");
-                            Game1.addHUDMessage(Message);
+                            string messageText = Helper.Translation.Get("tool.cant-upgrade1", new { materialsMessage = missingMaterials });
+                            HUDMessage hudMessage = HUDMessage.ForCornerTextbox(messageText);
+                            Game1.addHUDMessage(hudMessage);
                         }
                     }
                     else
                     {
-                        HUDMessage Message = HUDMessage.ForCornerTextbox($"You can't upgrade that.");
-                        Game1.addHUDMessage(Message);
+                        string messageText = Helper.Translation.Get("tool.cant-upgrade2");
+                        HUDMessage hudMessage = HUDMessage.ForCornerTextbox(messageText);
+                        Game1.addHUDMessage(hudMessage);
                     }
                 }
             }
@@ -117,10 +121,10 @@ namespace SmithYourself
 
         public bool CanUpgradeTool(int toolLevel, out string missingMaterials)
         {
-            string[] copperUpgrade = { "334", "5", "Copper Bars" }; // Copper Bars, 5 required
-            string[] ironUpgrade = { "335", "5", "Iron Bars" }; // Iron Bars, 5 required
-            string[] goldUpgrade = { "336", "5", "Gold Bars" }; // Gold Bars, 5 required
-            string[] iridiumUpgrade = { "337", "5", "Iridium Bars" }; // Iridium Bars, 5 required
+            string[] copperUpgrade = { "334", "5", Helper.Translation.Get("item.copper") }; // Copper Bars, 5 required
+            string[] ironUpgrade = { "335", "5", Helper.Translation.Get("item.iron") }; // Iron Bars, 5 required
+            string[] goldUpgrade = { "336", "5", Helper.Translation.Get("item.gold") }; // Gold Bars, 5 required
+            string[] iridiumUpgrade = { "337", "5", Helper.Translation.Get("item.iridium") }; // Iridium Bars, 5 required
 
             string[] requiredBars;
             switch (toolLevel)
@@ -138,13 +142,13 @@ namespace SmithYourself
                     requiredBars = iridiumUpgrade;
                     break;
                 default:
-                    missingMaterials = "The tool is already at the highest upgrade level.";
+                    missingMaterials = Helper.Translation.Get("tool.missing-materials-default");
                     return false;
             }
 
             if (!PlayerHasItem(int.Parse(requiredBars[1]), requiredBars[0]))
             {
-                missingMaterials = $"You need {requiredBars[1]} {requiredBars[2]}.";
+                missingMaterials = Helper.Translation.Get("tool.missing-materials-type", new { ItemAmount = requiredBars[1], itemType = requiredBars[2] });
                 return false;
             }
 
