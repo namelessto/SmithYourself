@@ -1,17 +1,21 @@
 {
-  "tool.cant-upgrade1": "Cannot upgrade this tool. {{materialsMessage}}\n",
-  "tool.cant-upgrade2": "You can't upgrade that.",
-  "tool.missing-materials-default": "The tool is already at the highest upgrade level.",
-  "tool.missing-materials-type": "You need {{ItemAmount}} {{itemType}}.",
+  "tool.empty": "You need to hold a tool.",
+  "tool.cant-upgrade1": "You can't upgrade that.",
+  "tool.max-level": "The tool is already at the highest upgrade level.",
+  "tool.missing-materials": "You need {{ItemAmount}} {{itemName}}.",
   "tool.upgraded": "Your {{toolType}} was upgraded!",
 
   "item.copper": "Copper Bars",
   "item.iron": "Iron Bars",
   "item.gold": "Gold Bars",
   "item.iridium": "Iridium Bars",
+  "item.wood": "Wood",
+  "item.qurtz": "Quartz",
   "item.hoe": "Hoe",
   "item.water-can": "Watering Can",
   "item.axe": "Axe",
+  "item.pickaxe": "Pickaxe",
   "item.pan": "Pan",
-  "item.pickaxe": "Pickaxe"
+  "item.fishing-rod": "Fishing Rod",
+  "item.trash-can": "Trash Can"
 }

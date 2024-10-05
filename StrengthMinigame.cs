@@ -3,9 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.GameData.Tools;
 using StardewValley.Menus;
-using SObject = StardewValley.Object;
 
 namespace SmithYourself
 {
@@ -13,6 +11,7 @@ namespace SmithYourself
     {
         // Game variables
         IModHelper helper;
+        UtilitiesClass utilsClass;
         private int powerMeter;
         private int maxPower;
         private int minPower;
@@ -23,9 +22,10 @@ namespace SmithYourself
         public bool IsRunning => isRunning;
 
         // Constructor
-        public StrengthMinigame(Texture2D barBackgroundImage) : base()
+        public StrengthMinigame(UtilitiesClass utilsClassInstance, IModHelper helperInstance, Texture2D barBackgroundImage) : base()
         {
-            helper = ModEntry.helperInstance!;
+            helper = helperInstance;
+            utilsClass = utilsClassInstance;
             isRunning = true;
             maxPower = 100;
             minPower = 0;
@@ -161,11 +161,14 @@ namespace SmithYourself
         }
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
-            if (!isRunning) return;
+            // if (!isRunning) return;
 
-            Tool currentTool = Game1.player.CurrentTool;
+            Item currentItem = Game1.player.CurrentItem;
             Game1.player.faceDirection(Game1.player.FacingDirection);
-            Game1.player.CurrentToolIndex = currentTool.IndexOfMenuItemView;
+            if (currentItem is Tool tool)
+            {
+                Game1.player.CurrentToolIndex = tool.IndexOfMenuItemView;
+            }
 
             switch (Game1.player.FacingDirection)
             {
@@ -183,95 +186,10 @@ namespace SmithYourself
                     break;
             }
 
-            UpgradeTool(currentTool, powerMeter);
+            utilsClass.UpgradeTool(currentItem, powerMeter);
             isRunning = false;
             Game1.exitActiveMenu();
             ModEntry.isMinigameOpen = false;
-        }
-
-        private void UpgradeTool(Tool tool, int powerMeter)
-        {
-            if (tool == null)
-            {
-                return;
-            }
-
-            ToolData toolData = tool.GetToolData();
-            string toolClassKey = toolData.ClassName.Contains("Can") ? "item.water-can" : $"item.{toolData.ClassName.ToLower()}";
-            string toolClass = helper.Translation.Get(toolClassKey);
-            string barName;
-            string barID = GetRequiredBarIDForToolUpgrade(tool.UpgradeLevel, out barName);
-            string newItemId = barName + toolData.ClassName;
-
-            Tool newTool = (Tool)ItemRegistry.Create(newItemId, 1);
-            SObject bar = (SObject)ItemRegistry.Create(barID, 1);
-
-            int requiredBars = 5;
-            int relevantSkillLevel = GetRelevantSkillLevel(toolData.ClassName);
-            if (powerMeter >= (100 - relevantSkillLevel))
-            {
-                requiredBars -= 1;
-            }
-
-            int indexOfBar = -1;
-            for (int i = 0; i < Game1.player.Items.Count; i++)
-            {
-                if (Game1.player.Items[i] is SObject inventoryItem && inventoryItem.QualifiedItemId == bar.QualifiedItemId)
-                {
-                    indexOfBar = i;
-                    break;
-                }
-            }
-
-            if (indexOfBar >= 0 && requiredBars <= Game1.player.Items[indexOfBar].Stack)
-            {
-                Game1.player.Items[indexOfBar].Stack -= requiredBars;
-            }
-
-            Game1.player.removeItemFromInventory(tool);
-            Game1.player.addItemToInventory(newTool);
-
-            HUDMessage Message = HUDMessage.ForCornerTextbox(helper.Translation.Get("tool.upgraded", new { toolType = toolClass }));
-            Game1.addHUDMessage(Message);
-        }
-
-        private int GetRelevantSkillLevel(string toolType)
-        {
-            switch (toolType)
-            {
-                case "Axe":
-                case "Pan":
-                    return Game1.player.ForagingLevel;
-                case "Pickaxe":
-                    return Game1.player.MiningLevel;
-                case "Hoe":
-                case "WateringCan":
-                    return Game1.player.FarmingLevel;
-                default:
-                    return Game1.player.Level; // Fallback level (consider changing if needed)
-            }
-        }
-
-        private string GetRequiredBarIDForToolUpgrade(int toolLevel, out string barName)
-        {
-            switch (toolLevel)
-            {
-                case 0:
-                    barName = "Copper";
-                    return "334";
-                case 1:
-                    barName = "Steel";
-                    return "335";
-                case 2:
-                    barName = "Gold";
-                    return "336";
-                case 3:
-                    barName = "Iridium";
-                    return "337";
-                default:
-                    barName = "Invalid";
-                    return "-1";
-            }
         }
     }
 }
