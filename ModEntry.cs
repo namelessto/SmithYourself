@@ -2,20 +2,14 @@
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using StardewValley.GameData.Tools;
-using StardewValley.Menus;
-using StardewValley.Tools;
 using SObject = StardewValley.Object;
 
 namespace SmithYourself
 {
-
-    /// <summary>The mod entry point.</summary>
     internal sealed class ModEntry : Mod
     {
-        private UtilitiesClass utilsClass;
+        private UtilitiesClass? utilsClass;
         private Texture2D? minigameBarBackground;
-        // public static IMonitor? monitor;
         public static bool isMinigameOpen = false;
 
         public override void Entry(IModHelper helper)
@@ -50,7 +44,7 @@ namespace SmithYourself
         {
             if (!Context.IsWorldReady)
                 return;
-            if (minigameBarBackground != null)
+            if (minigameBarBackground != null && utilsClass != null)
             {
                 if (
                     e.Button.IsActionButton() &&
@@ -58,7 +52,7 @@ namespace SmithYourself
                     cursorObject.QualifiedItemId == "(BC)NamelessTo.SmithYourselfCP.SmithAnvil"
                 )
                 {
-                    StrengthMinigame minigame = new(utilsClass, Helper, minigameBarBackground);
+                    StrengthMinigame minigame = new(utilsClass, minigameBarBackground);
                     if (isMinigameOpen)
                     {
                         return;
@@ -76,11 +70,6 @@ namespace SmithYourself
             else
             {
                 Monitor.Log("Minigame assets missing", LogLevel.Error);
-            }
-            if (e.Button == SButton.G)
-            {
-                Monitor.Log($"Player holding {Game1.player.CurrentItem}", LogLevel.Warn);
-                Monitor.Log($"Item category {Game1.player.CurrentItem.Category}", LogLevel.Warn);
             }
         }
     }

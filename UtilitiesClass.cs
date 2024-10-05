@@ -198,6 +198,7 @@ namespace SmithYourself
             string toolClass;
             int toolLevel;
             bool isTrashCan;
+            bool isCritical;
 
             if (currentItem is Tool currentTool)
             {
@@ -215,7 +216,7 @@ namespace SmithYourself
             }
 
             RequiredItem materials = GetRequiredItems(toolClass, toolLevel);
-            materials.ItemAmount = CalculateMaterialsToUse(toolClass, powerMeter, materials.ItemAmount);
+            materials.ItemAmount = CalculateMaterialsToUse(toolClass, powerMeter, materials.ItemAmount, out isCritical);
             SObject materialObject = (SObject)ItemRegistry.Create(materials.ItemId, 1);
 
             int indexOfBar = GetItemIndexFromInventory(materialObject);
@@ -231,16 +232,22 @@ namespace SmithYourself
                 {
                     Game1.player.removeItemFromInventory(currentItem);
                     Game1.player.addItemToInventory(newTool);
-                    message = helper.Translation.Get("tool.upgraded", new { toolType = displayClassName });
-                    ShowMessage(message);
                 }
             }
             else
             {
                 Game1.player.trashCanLevel++;
-                message = helper.Translation.Get("tool.upgraded", new { toolType = displayClassName });
-                ShowMessage(message);
             }
+            if (isCritical)
+            {
+                message = helper.Translation.Get("tool.upgraded-critical", new { toolType = displayClassName });
+            }
+            else
+            {
+                message = helper.Translation.Get("tool.upgraded", new { toolType = displayClassName });
+            }
+
+            ShowMessage(message);
         }
         public string GetDisplayClassName(string toolClass)
         {
@@ -252,13 +259,16 @@ namespace SmithYourself
             };
         }
 
-        private int CalculateMaterialsToUse(string toolClass, int powerMeter, int initialRequireAmount)
+        private int CalculateMaterialsToUse(string toolClass, int powerMeter, int initialRequireAmount, out bool isCritical)
         {
             int relevantSkillLevel = GetRelevantSkillLevel(toolClass);
             if (powerMeter >= (100 - relevantSkillLevel))
             {
-                return initialRequireAmount - 1;
+                isCritical = true;
+                return initialRequireAmount - (int)(initialRequireAmount * 0.2);
             }
+
+            isCritical = false;
             return initialRequireAmount;
         }
 
@@ -276,7 +286,6 @@ namespace SmithYourself
 
         private string GetNextLevelId(string toolClass, int toolLevel, bool skipTrainingRod = false)
         {
-            // Check tool class with a switch expression
             return toolClass switch
             {
                 "FishingRod" => toolLevel switch
@@ -308,15 +317,15 @@ namespace SmithYourself
                 "Hoe" => Game1.player.FarmingLevel,
                 "WateringCan" => Game1.player.FarmingLevel,
                 "FishingRod" => Game1.player.FishingLevel,
-                _ => Game1.player.Level // Fallback level
+                _ => Game1.player.Level
             };
         }
     }
 
     public class RequiredItem
     {
-        public string ItemId { get; set; }
-        public string ItemName { get; set; }
+        public string ItemId { get; set; } = "";
+        public string ItemName { get; set; } = "";
         public int ItemAmount { get; set; }
     }
 }
