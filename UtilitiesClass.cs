@@ -200,10 +200,10 @@ namespace SmithYourself
             bool isTrashCan;
             bool isCritical;
 
-            if (currentItem is Tool currentTool)
+            if (currentItem is Tool tool)
             {
-                toolClass = currentTool.GetToolData().ClassName;
-                toolLevel = currentTool.UpgradeLevel;
+                toolClass = tool.GetToolData().ClassName;
+                toolLevel = tool.UpgradeLevel;
                 displayClassName = GetDisplayClassName(toolClass);
                 isTrashCan = false;
             }
@@ -226,10 +226,25 @@ namespace SmithYourself
             {
                 //TODO: Implement fishing rod bool - skip trainging rod
                 string newItemId = GetNextLevelId(toolClass, toolLevel);
+                Tool currentTool = (Tool)currentItem;
                 Tool newTool = (Tool)ItemRegistry.Create(newItemId, 1);
+
+                if (currentTool.attachments.Length > 0)
+                {
+                    for (int i = 0; i < currentTool.attachments.Length; i++)
+                    {
+                        if (currentTool.attachments[i] != null)
+                        {
+                            newTool.attachments[i] = currentTool.attachments[i];
+                        }
+                    }
+                }
+                newTool.CopyEnchantments(currentTool, newTool);
+
 
                 if (newTool != null)
                 {
+
                     Game1.player.removeItemFromInventory(currentItem);
                     Game1.player.addItemToInventory(newTool);
                 }
@@ -253,7 +268,7 @@ namespace SmithYourself
         {
             return toolClass switch
             {
-                "WaterCan" => helper.Translation.Get("item.water-can"),
+                "WateringCan" => helper.Translation.Get("item.water-can"),
                 "FishingRod" => helper.Translation.Get("item.fishing-rod"),
                 _ => helper.Translation.Get($"item.{toolClass.ToLower()}")
             };
