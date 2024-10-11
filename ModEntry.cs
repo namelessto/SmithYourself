@@ -8,13 +8,15 @@ namespace SmithYourself
 {
     internal sealed class ModEntry : Mod
     {
-        private UtilitiesClass? utilsClass;
+        public static ModConfig Config;
+        private UtilitiesClass UtilsClass;
         private Texture2D? minigameBarBackground;
         public static bool isMinigameOpen = false;
 
         public override void Entry(IModHelper helper)
         {
-            utilsClass = new UtilitiesClass(helper, Monitor);
+            Config = Helper.ReadConfig<ModConfig>();
+            UtilsClass = new UtilitiesClass(helper, Monitor, Config);
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
@@ -38,32 +40,50 @@ namespace SmithYourself
             {
                 minigameBarBackground = Helper.ModContent.Load<Texture2D>("assets/MinigameBar.png");
             }
+            var configMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            if (configMenu is null)
+                return;
+
+            configMenu.Register(
+                mod: ModManifest,
+                reset: () => Config = new ModConfig(),
+                save: () => Helper.WriteConfig(Config)
+            );
+
+            ModMenu.BuildMenu(Helper, ModManifest, configMenu);
         }
 
         private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
         {
             if (!Context.IsWorldReady)
                 return;
-            if (minigameBarBackground != null && utilsClass != null)
+            if (minigameBarBackground != null && UtilsClass != null)
             {
                 if (
                     e.Button.IsActionButton() &&
-                    utilsClass.GetObjectAtCursor() is SObject cursorObject &&
+                    UtilsClass.GetObjectAtCursor() is SObject cursorObject &&
                     cursorObject.QualifiedItemId == "(BC)NamelessTo.SmithYourselfCP.SmithAnvil"
                 )
                 {
-                    StrengthMinigame minigame = new(utilsClass, minigameBarBackground);
+                    Item currentHeldItem = Game1.player.CurrentItem;
+                    bool canUpgrade = UtilsClass.CanUpgradeTool(currentHeldItem);
+
+                    StrengthMinigame minigame = new(UtilsClass, minigameBarBackground);
                     if (isMinigameOpen)
                     {
                         return;
                     }
-                    Item currentHeldItem = Game1.player.CurrentItem;
 
-                    if (utilsClass.CanUpgradeTool(currentHeldItem))
+                    if (!Config.SkipMinigame && canUpgrade)
                     {
                         minigame.GetObjectPosition(cursorObject.TileLocation, Game1.player.Position);
                         Game1.activeClickableMenu = minigame;
                         isMinigameOpen = true;
+                    }
+                    else if (Config.SkipMinigame && canUpgrade)
+                    {
+                        float powerMeter = -1f;
+                        UtilsClass.UpgradeTool(currentHeldItem, powerMeter);
                     }
                 }
             }

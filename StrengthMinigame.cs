@@ -8,18 +8,18 @@ namespace SmithYourself
 {
     internal class StrengthMinigame : IClickableMenu
     {
-        UtilitiesClass utilsClass;
+        readonly UtilitiesClass UtilsClass;
         private readonly Texture2D barBackground;
         private Vector2 barPosition;
-        private readonly int maxPower = 100;
-        private readonly int minPower = 0;
-        private int powerMeter;
+        private readonly float maxPower = 1f;
+        private readonly float minPower = 0f;
+        private float powerMeter;
         private bool isIncreasing;
 
         // Constructor
         public StrengthMinigame(UtilitiesClass utilsClassInstance, Texture2D barBackgroundImage) : base()
         {
-            utilsClass = utilsClassInstance;
+            UtilsClass = utilsClassInstance;
             powerMeter = minPower;
             isIncreasing = true;
             barBackground = barBackgroundImage;
@@ -53,7 +53,7 @@ namespace SmithYourself
             int barWidth = 10;
             int maxBarHeight = 50;
 
-            int calculatedBarHeight = (int)(powerMeter * (maxBarHeight / (float)maxPower) * scale);
+            int calculatedBarHeight = (int)(powerMeter * (maxBarHeight / maxPower) * scale);
 
             int barHeight = Math.Clamp(calculatedBarHeight, 0, maxBarHeight * scale);
 
@@ -95,7 +95,8 @@ namespace SmithYourself
         {
             if (isIncreasing)
             {
-                powerMeter += 1;
+                powerMeter += ModEntry.Config.MinigameBarIncrement;
+                // powerMeter += 0.02f;
                 if (powerMeter >= maxPower)
                 {
                     isIncreasing = false;
@@ -103,7 +104,8 @@ namespace SmithYourself
             }
             else
             {
-                powerMeter -= 1;
+                powerMeter -= ModEntry.Config.MinigameBarIncrement;
+                // powerMeter -= 0.02f;
                 if (powerMeter <= minPower)
                 {
                     isIncreasing = true;
@@ -163,7 +165,8 @@ namespace SmithYourself
                     break;
             }
 
-            utilsClass.UpgradeTool(currentItem, powerMeter);
+            UtilsClass.UpgradeTool(currentItem, powerMeter);
+
             Game1.exitActiveMenu();
             ModEntry.isMinigameOpen = false;
         }

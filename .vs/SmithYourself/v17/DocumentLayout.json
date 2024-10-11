@@ -3,12 +3,24 @@
   "WorkspaceRootPath": "D:\\Projects\\Stardew Mods\\SmithYourself\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\strengthminigame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:strengthminigame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\modmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:modmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\igenericmodconfigmenuapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:igenericmodconfigmenuapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\modentry.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:modentry.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\modconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:modconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\strengthminigame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:strengthminigame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\build\\Pathoschild.Stardew.ModBuildConfig.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
@@ -40,6 +52,31 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "ModMenu.cs",
+              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModMenu.cs",
+              "RelativeDocumentMoniker": "ModMenu.cs",
+              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModMenu.cs",
+              "RelativeToolTip": "ModMenu.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-10T07:00:26.342Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "IGenericModConfigMenuApi.cs",
+              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\IGenericModConfigMenuApi.cs",
+              "RelativeDocumentMoniker": "IGenericModConfigMenuApi.cs",
+              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\IGenericModConfigMenuApi.cs",
+              "RelativeToolTip": "IGenericModConfigMenuApi.cs",
+              "ViewState": "AQIAAGsAAAAAAAAAAAAiwHUAAAAwAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-10T06:55:22.079Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "StrengthMinigame.cs",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\StrengthMinigame.cs",
               "RelativeDocumentMoniker": "StrengthMinigame.cs",
@@ -47,12 +84,11 @@
               "RelativeToolTip": "StrengthMinigame.cs",
               "ViewState": "AQIAAKoAAAAAAAAAAAAAAKoAAAABAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-29T15:48:29.392Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-29T15:48:29.392Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 6,
               "Title": "Microsoft.Common.CurrentVersion.targets",
               "DocumentMoniker": "C:\\Coding\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "ToolTip": "C:\\Coding\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
@@ -62,7 +98,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
               "Title": "mod-package.md",
               "DocumentMoniker": "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\mod-package.md",
               "ToolTip": "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\mod-package.md",
@@ -72,7 +108,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "Pathoschild.Stardew.ModBuildConfig.targets",
               "DocumentMoniker": "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\build\\Pathoschild.Stardew.ModBuildConfig.targets",
               "ToolTip": "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\build\\Pathoschild.Stardew.ModBuildConfig.targets",
@@ -82,19 +118,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "ModEntry.cs",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModEntry.cs",
               "RelativeDocumentMoniker": "ModEntry.cs",
               "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModEntry.cs",
               "RelativeToolTip": "ModEntry.cs",
-              "ViewState": "AQIAADUAAAAAAAAAAAAYwEMAAAAUAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAnAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-17T13:51:43.016Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 3,
+              "Title": "ModConfig.cs",
+              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModConfig.cs",
+              "RelativeDocumentMoniker": "ModConfig.cs",
+              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModConfig.cs",
+              "RelativeToolTip": "ModConfig.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-07T08:52:39.625Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "SmithYourself.csproj",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\SmithYourself.csproj",
               "RelativeDocumentMoniker": "SmithYourself.csproj",
@@ -106,7 +154,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "manifest.json",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\manifest.json",
               "RelativeDocumentMoniker": "manifest.json",
