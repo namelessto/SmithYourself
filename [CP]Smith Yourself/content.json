@@ -29,6 +29,19 @@
       "When": {
         "HasFlag": "guildMember"
       }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Shops",
+      "TargetField": ["AdventureShop", "Items"],
+      "Entries": {
+        "Example.ModId_Pufferfish": {
+          "Id": "{{ModId}}.SmithAnvil",
+          "ItemId": "(BC){{ModId}}.SmithAnvil",
+          "Price": 2500,
+          "AvailableStock": 1
+        }
+      }
     }
   ]
 }
