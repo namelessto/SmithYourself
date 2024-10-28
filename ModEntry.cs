@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Menus;
 using SObject = StardewValley.Object;
 
 namespace SmithYourself
@@ -9,6 +10,7 @@ namespace SmithYourself
     internal sealed class ModEntry : Mod
     {
         public static ModConfig Config;
+        public static IMonitor monitor;
         private UtilitiesClass UtilsClass;
         private Texture2D? minigameBarBackground;
         public static bool isMinigameOpen = false;
@@ -16,6 +18,7 @@ namespace SmithYourself
         public override void Entry(IModHelper helper)
         {
             Config = Helper.ReadConfig<ModConfig>();
+            monitor = Monitor;
             UtilsClass = new UtilitiesClass(helper, Monitor, Config);
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
@@ -68,7 +71,6 @@ namespace SmithYourself
                     Item currentHeldItem = Game1.player.CurrentItem;
                     bool canUpgrade = UtilsClass.CanUpgradeTool(currentHeldItem);
 
-                    StrengthMinigame minigame = new(UtilsClass, minigameBarBackground);
                     if (isMinigameOpen)
                     {
                         return;
@@ -76,14 +78,14 @@ namespace SmithYourself
 
                     if (!Config.SkipMinigame && canUpgrade)
                     {
+                        StrengthMinigame minigame = new(UtilsClass, minigameBarBackground);
                         minigame.GetObjectPosition(cursorObject.TileLocation, Game1.player.Position);
                         Game1.activeClickableMenu = minigame;
                         isMinigameOpen = true;
                     }
                     else if (Config.SkipMinigame && canUpgrade)
                     {
-                        float powerMeter = -1f;
-                        UtilsClass.UpgradeTool(currentHeldItem, powerMeter);
+                        UtilsClass.UpgradeTool(currentHeldItem, UpgradeResult.Normal);
                     }
                 }
             }

@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "D:\\Projects\\Stardew Mods\\SmithYourself\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\utilitiesclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:utilitiesclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\modmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:modmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -52,19 +56,31 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ModMenu.cs",
-              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModMenu.cs",
-              "RelativeDocumentMoniker": "ModMenu.cs",
-              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModMenu.cs",
-              "RelativeToolTip": "ModMenu.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAqAAAA",
+              "Title": "UtilitiesClass.cs",
+              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\UtilitiesClass.cs",
+              "RelativeDocumentMoniker": "UtilitiesClass.cs",
+              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\UtilitiesClass.cs",
+              "RelativeToolTip": "UtilitiesClass.cs",
+              "ViewState": "AQIAAD0BAAAAAAAAAAAswBABAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-10T07:00:26.342Z",
+              "WhenOpened": "2024-10-27T07:55:01.48Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "ModMenu.cs",
+              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModMenu.cs",
+              "RelativeDocumentMoniker": "ModMenu.cs",
+              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModMenu.cs",
+              "RelativeToolTip": "ModMenu.cs",
+              "ViewState": "AQIAAAwAAAAAAAAAAAAowAsAAAAqAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-10T07:00:26.342Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "IGenericModConfigMenuApi.cs",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\IGenericModConfigMenuApi.cs",
               "RelativeDocumentMoniker": "IGenericModConfigMenuApi.cs",
@@ -76,7 +92,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "StrengthMinigame.cs",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\StrengthMinigame.cs",
               "RelativeDocumentMoniker": "StrengthMinigame.cs",
@@ -88,7 +104,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "Microsoft.Common.CurrentVersion.targets",
               "DocumentMoniker": "C:\\Coding\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "ToolTip": "C:\\Coding\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
@@ -98,7 +114,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "mod-package.md",
               "DocumentMoniker": "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\mod-package.md",
               "ToolTip": "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\mod-package.md",
@@ -108,7 +124,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Pathoschild.Stardew.ModBuildConfig.targets",
               "DocumentMoniker": "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\build\\Pathoschild.Stardew.ModBuildConfig.targets",
               "ToolTip": "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\build\\Pathoschild.Stardew.ModBuildConfig.targets",
@@ -118,7 +134,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "ModEntry.cs",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModEntry.cs",
               "RelativeDocumentMoniker": "ModEntry.cs",
@@ -130,7 +146,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "ModConfig.cs",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModConfig.cs",
               "RelativeDocumentMoniker": "ModConfig.cs",
@@ -142,7 +158,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "SmithYourself.csproj",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\SmithYourself.csproj",
               "RelativeDocumentMoniker": "SmithYourself.csproj",
@@ -154,7 +170,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "manifest.json",
               "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\manifest.json",
               "RelativeDocumentMoniker": "manifest.json",

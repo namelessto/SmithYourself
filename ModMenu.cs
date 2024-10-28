@@ -25,6 +25,14 @@ namespace SmithYourself
 
             configMenu.AddBoolOption(
                 mod: manifest,
+                name: () => helper.Translation.Get("menu.simple-minigame"),
+                tooltip: () => helper.Translation.Get("menu.simple-minigame-tooltip"),
+                getValue: () => ModEntry.Config.SimpleMinigame,
+                setValue: value => ModEntry.Config.SimpleMinigame = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
                 name: () => helper.Translation.Get("menu.skip-training-rod"),
                 getValue: () => ModEntry.Config.SkipTrainingRod,
                 setValue: value => ModEntry.Config.SkipTrainingRod = value
@@ -33,6 +41,7 @@ namespace SmithYourself
             configMenu.AddBoolOption(
                 mod: manifest,
                 name: () => helper.Translation.Get("menu.allow-fail"),
+                tooltip: () => helper.Translation.Get("menu.allow-fail-tooltip"),
                 getValue: () => ModEntry.Config.AllowFail,
                 setValue: value => ModEntry.Config.AllowFail = value
             );
@@ -40,7 +49,6 @@ namespace SmithYourself
             configMenu.AddNumberOption(
                 mod: manifest,
                 name: () => helper.Translation.Get("menu.fail-point"),
-                tooltip: () => helper.Translation.Get("menu.fail-point-tooltip"),
                 getValue: () => ModEntry.Config.FailPoint,
                 setValue: value => ModEntry.Config.FailPoint = value,
                 min: 0f,

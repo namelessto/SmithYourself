@@ -1,5 +1,7 @@
 ﻿using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Menus;
+using StardewValley.Tools;
 using SObject = StardewValley.Object;
 
 namespace SmithYourself
@@ -7,8 +9,11 @@ namespace SmithYourself
     internal class UtilitiesClass
     {
         private readonly IModHelper helper;
-        private readonly IMonitor monitor;
         private readonly ModConfig config;
+        private readonly IMonitor monitor;
+        private readonly ToolUpgradeData toolUpgradeData = new();
+        private string toolClass = "";
+        private int toolLevel;
 
         public UtilitiesClass(IModHelper modHelper, IMonitor modMonitor, ModConfig modConfig)
         {
@@ -32,8 +37,6 @@ namespace SmithYourself
         public bool CanUpgradeTool(Item currentItem)
         {
             string message;
-            string toolClass;
-            int toolLevel;
 
             if (currentItem == null)
             {
@@ -48,10 +51,29 @@ namespace SmithYourself
                 return false;
             }
 
-            if (currentItem is Tool currentTool)
+            if (currentItem is Tool currentTool && currentItem is not MeleeWeapon)
             {
                 toolClass = currentTool.GetToolData().ClassName;
                 toolLevel = currentTool.UpgradeLevel;
+            }
+            else if (currentItem is MeleeWeapon weapon)
+            {
+                if (weapon.ItemId != "47" && weapon.ItemId != "53")
+                {
+                    message = helper.Translation.Get("tool.cant-upgrade");
+                    ShowMessage(message);
+                    return false;
+                }
+                else if (weapon.ItemId == "47")
+                {
+                    toolClass = "Scythe";
+                    toolLevel = 0;
+                }
+                else
+                {
+                    toolClass = "Scythe";
+                    toolLevel = 1;
+                }
             }
             else
             {
@@ -65,7 +87,7 @@ namespace SmithYourself
                 return false;
             }
 
-            ToolUpgradeData toolUpgradeData = GetRequiredItems(toolClass, toolLevel);
+            SetRequiredItems(toolClass, toolLevel);
 
             string requiredItemId = toolUpgradeData.ItemId;
             string requiredItemName = toolUpgradeData.ItemName;
@@ -89,25 +111,30 @@ namespace SmithYourself
 
         public bool PlayerHasItem(string itemId, int requiredAmount)
         {
-            if (requiredAmount <= 0) return true; // No items required
+            if (requiredAmount <= 0) return true;
 
             int totalAmount = Game1.player.Items
                 .Where(item => item is SObject obj && obj.ItemId == itemId)
-                .Sum(item => ((SObject)item).Stack); // Sum the quantities of the item
+                .Sum(item => ((SObject)item).Stack);
 
             return totalAmount >= requiredAmount;
         }
 
-        private ToolUpgradeData GetRequiredItems(string toolClass, int toolLevel)
+        private void SetRequiredItems(string toolClass, int toolLevel)
         {
-            ToolUpgradeData toolUpgradeData = new();
-
             if (toolClass == "FishingRod")
             {
                 toolUpgradeData.ToolPrefix = config.RodUpgradePrefixes[toolLevel];
                 toolUpgradeData.ItemId = config.RodUpgradeItemsId[toolLevel];
                 toolUpgradeData.ItemName = new SObject(toolUpgradeData.ItemId, 1).DisplayName;
                 toolUpgradeData.MaterialAmount = config.RodUpgradeAmounts[toolLevel];
+            }
+            else if (toolClass == "Scythe")
+            {
+                toolUpgradeData.ToolPrefix = config.ScytheUpgradePrefixes[toolLevel];
+                toolUpgradeData.ItemId = config.ScytheUpgradeItemsId[toolLevel];
+                toolUpgradeData.ItemName = new SObject(toolUpgradeData.ItemId, 1).DisplayName;
+                toolUpgradeData.MaterialAmount = config.ScytheUpgradeAmounts[toolLevel];
             }
             else
             {
@@ -116,22 +143,31 @@ namespace SmithYourself
                 toolUpgradeData.ItemName = new SObject(toolUpgradeData.ItemId, 1).DisplayName;
                 toolUpgradeData.MaterialAmount = config.ToolUpgradeAmounts[toolLevel];
             }
-            return toolUpgradeData;
         }
 
-        public void UpgradeTool(Item currentItem, float powerMeter)
+        public void UpgradeTool(Item currentItem, UpgradeResult result)
         {
-            string displayName = currentItem.DisplayName;
-            string toolClass;
-            int toolLevel;
-            bool isTrashCan;
-            UpgradeResult result = UpgradeResult.Normal;
+            bool isTrashCan = false;
+            bool isScythe = false;
 
-            if (currentItem is Tool tool)
+            if (currentItem is Tool tool && currentItem is not MeleeWeapon)
             {
                 toolClass = tool.GetToolData().ClassName;
                 toolLevel = tool.UpgradeLevel;
-                isTrashCan = false;
+            }
+            else if (currentItem is MeleeWeapon weapon)
+            {
+                isScythe = true;
+                if (weapon.ItemId == "47")
+                {
+                    toolClass = "Scythe";
+                    toolLevel = 0;
+                }
+                else
+                {
+                    toolClass = "Scythe";
+                    toolLevel = 1;
+                }
             }
             else
             {
@@ -140,107 +176,122 @@ namespace SmithYourself
                 isTrashCan = true;
             }
 
-            ToolUpgradeData upgradeData = GetRequiredItems(toolClass, toolLevel);
-            if (ModEntry.Config.ToolUpgradeAmounts[toolLevel] > 0)
-            {
-                (upgradeData.MaterialAmount, result) = CalculateMaterialsToUse(toolClass, powerMeter, upgradeData.MaterialAmount);
-                SObject materialObject = (SObject)ItemRegistry.Create(upgradeData.ItemId, 1);
+            SetRequiredItems(toolClass, toolLevel);
+            RemoveMaterial(result);
 
-                int indexOfBar = GetItemIndexFromInventory(materialObject);
-                Game1.player.Items[indexOfBar].Stack -= upgradeData.MaterialAmount;
-            }
-
-            if (result != UpgradeResult.Failed)
+            if (!isTrashCan)
             {
-                if (!isTrashCan)
+                string newItemId;
+                Tool currentTool;
+                Tool newTool;
+                if (!isScythe)
                 {
-                    string newItemId = GetNextLevelId(toolClass, toolLevel);
-                    Tool currentTool = (Tool)currentItem;
-                    Tool newTool = (Tool)ItemRegistry.Create(newItemId, 1);
-
-                    if (currentTool.attachments.Length > 0)
-                    {
-                        for (int i = 0; i < currentTool.attachments.Length; i++)
-                        {
-                            if (currentTool.attachments[i] != null)
-                            {
-                                newTool.attachments[i] = currentTool.attachments[i];
-                            }
-                        }
-                    }
-                    newTool.CopyEnchantments(currentTool, newTool);
-
-                    if (newTool != null)
-                    {
-                        Game1.player.removeItemFromInventory(currentItem);
-                        Game1.player.addItemToInventory(newTool);
-                    }
+                    newItemId = GetNextLevelId(toolClass, toolLevel);
                 }
                 else
                 {
-                    Game1.player.trashCanLevel++;
+                    newItemId = currentItem.ItemId == "47" ? "(W)53" : "(W)66";
+                }
+                currentTool = (Tool)currentItem;
+                var tempItem = ItemRegistry.Create(newItemId, 1);
+                newTool = (Tool)tempItem;
+
+                if (currentTool.attachments.Length > 0)
+                {
+                    for (int i = 0; i < currentTool.attachments.Length; i++)
+                    {
+                        if (currentTool.attachments[i] != null)
+                        {
+                            newTool.attachments[i] = currentTool.attachments[i];
+                        }
+                    }
+                }
+                newTool.CopyEnchantments(currentTool, newTool);
+
+                if (newTool != null)
+                {
+                    Game1.player.removeItemFromInventory(currentItem);
+                    Game1.player.addItemToInventory(newTool);
                 }
             }
-
-            switch (result)
+            else
             {
-                case UpgradeResult.Failed:
-                    ShowMessage(helper.Translation.Get("tool.upgrade-failed", new { toolType = displayName }));
-                    break;
-
-                case UpgradeResult.Critical:
-                    ShowMessage(helper.Translation.Get("tool.upgraded-critical", new { toolType = displayName }));
-                    break;
-
-                default:
-                    ShowMessage(helper.Translation.Get("tool.upgraded", new { toolType = displayName }));
-                    break;
+                Game1.player.trashCanLevel++;
             }
         }
 
-        public string GetDisplayClassName(string toolClass)
+        public void RemoveMaterial(UpgradeResult result)
         {
-            return toolClass switch
+            UpdateRequiredAmount(result);
+
+            if (ModEntry.Config.ToolUpgradeAmounts[toolLevel] > 0)
             {
-                "WateringCan" => helper.Translation.Get("item.water-can"),
-                "FishingRod" => helper.Translation.Get("item.fishing-rod"),
-                _ => helper.Translation.Get($"item.{toolClass.ToLower()}")
-            };
+                SObject materialObject = (SObject)ItemRegistry.Create(toolUpgradeData.ItemId, 1);
+                int indexOfMaterial = GetItemIndexFromInventory(materialObject);
+                Game1.player.Items[indexOfMaterial].Stack -= toolUpgradeData.MaterialAmount;
+            }
         }
 
-        private (int materialAmount, UpgradeResult result) CalculateMaterialsToUse(string toolClass, float powerMeter, int initialRequiredAmount)
+        public int CalculateAttemptScore(float powerMeter)
         {
-            const float criticalReductionPercentage = 0.2f;
-
-            if (powerMeter == -1f)
-            {
-                return (initialRequiredAmount, UpgradeResult.Normal);
-            }
-
             int relevantSkillLevel = GetRelevantSkillLevel(toolClass);
-            float successThreshold = 100 - relevantSkillLevel;
+            float successThreshold = 96 - relevantSkillLevel;
+            int score;
 
             if (powerMeter * 100 >= successThreshold)
             {
-                int reducedAmount = initialRequiredAmount - (int)(initialRequiredAmount * criticalReductionPercentage);
-                return (reducedAmount, UpgradeResult.Critical);
+                score = (int)UpgradeResult.Critical;
             }
-
-            if (ModEntry.Config.AllowFail && powerMeter <= ModEntry.Config.FailPoint)
+            else if (ModEntry.Config.AllowFail && powerMeter <= ModEntry.Config.FailPoint)
             {
-                int failAmount = (int)(initialRequiredAmount * criticalReductionPercentage); // or any logic for failure
-                return (failAmount, UpgradeResult.Failed);
+                score = (int)UpgradeResult.Failed;
+            }
+            else
+            {
+                score = (int)UpgradeResult.Normal;
             }
 
-            return (initialRequiredAmount, UpgradeResult.Normal);
+            return score;
         }
 
+        public void UpdateRequiredAmount(UpgradeResult minigameResult)
+        {
+            const float criticalReductionPercentage = 0.25f;
+            switch (minigameResult)
+            {
+                case UpgradeResult.Failed:
+                    toolUpgradeData.MaterialAmount = (int)(toolUpgradeData.MaterialAmount * criticalReductionPercentage);
+                    break;
+                case UpgradeResult.Critical:
+                    toolUpgradeData.MaterialAmount -= (int)(toolUpgradeData.MaterialAmount * criticalReductionPercentage);
+                    break;
+                case UpgradeResult.Normal:
+                default:
+                    break;
+            }
+        }
 
-        private int GetItemIndexFromInventory(SObject bar)
+        public int MaxRepeatAmount()
+        {
+            if (config.SimpleMinigame)
+            {
+                return 1;
+            }
+
+            if (toolClass == "Scythe")
+            {
+                return config.ScytheMinigameRepeat[toolLevel];
+            }
+            else
+            {
+                return config.ToolMinigameRepeat[toolLevel];
+            }
+        }
+        private int GetItemIndexFromInventory(SObject material)
         {
             for (int i = 0; i < Game1.player.Items.Count; i++)
             {
-                if (Game1.player.Items[i] is SObject inventoryItem && inventoryItem.QualifiedItemId == bar.QualifiedItemId)
+                if (Game1.player.Items[i] is SObject inventoryItem && inventoryItem.QualifiedItemId == material.QualifiedItemId)
                 {
                     return i;
                 }
@@ -265,14 +316,33 @@ namespace SmithYourself
         {
             return toolType switch
             {
+                "Hoe" => Game1.player.FarmingLevel,
+                "Scythe" => Game1.player.FarmingLevel,
                 "Axe" => Game1.player.ForagingLevel,
                 "Pan" => Game1.player.MiningLevel,
                 "Pickaxe" => Game1.player.MiningLevel,
-                "Hoe" => Game1.player.FarmingLevel,
                 "WateringCan" => Game1.player.FarmingLevel,
                 "FishingRod" => Game1.player.FishingLevel,
                 _ => Game1.player.Level
             };
+        }
+
+        public void ShowResult(UpgradeResult result, string displayName)
+        {
+            switch (result)
+            {
+                case UpgradeResult.Failed:
+                    ShowMessage(helper.Translation.Get("tool.upgrade-failed", new { toolType = displayName }));
+                    break;
+
+                case UpgradeResult.Critical:
+                    ShowMessage(helper.Translation.Get("tool.upgraded-critical", new { toolType = displayName }));
+                    break;
+
+                default:
+                    ShowMessage(helper.Translation.Get("tool.upgraded", new { toolType = displayName }));
+                    break;
+            }
         }
     }
 
@@ -286,8 +356,8 @@ namespace SmithYourself
     }
     internal enum UpgradeResult
     {
+        Failed,
         Normal,
-        Critical,
-        Failed
+        Critical
     }
 }

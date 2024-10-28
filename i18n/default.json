@@ -9,10 +9,12 @@
 
   "menu.main-title": "Smith Yourself Configuration Menu",
   "menu.skip-minigame": "Skip Minigame",
+  "menu.simple-minigame": "Simple Minigame",
+  "menu.simple-minigame-tooltip": "Play the minigame only once",
   "menu.skip-training-rod": "Skip Training Rod Upgrade",
   "menu.allow-fail": "Enable Minigame Failure",
+  "menu.allow-fail-tooltip": "Lose materials without upgrading your tool.",
   "menu.fail-point": "Failure Threshold (%)",
-  "menu.fail-point-tooltip": "Lose materials without upgrading your tool.",
   "menu.minigame-speed": "Minigame Speed",
   "menu.minigame-speed-tooltip": "Higher value - faster minigame",
   "menu.material-title": "Upgrade Materials: IDs and Quantities",

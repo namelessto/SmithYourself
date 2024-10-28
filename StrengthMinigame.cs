@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 
@@ -15,14 +16,17 @@ namespace SmithYourself
         private readonly float minPower = 0f;
         private float powerMeter;
         private bool isIncreasing;
+        private int maxRepeatAmount;
+        private int currentRepeatAmount = 0;
+        private int minigameScore = 0;
 
-        // Constructor
         public StrengthMinigame(UtilitiesClass utilsClassInstance, Texture2D barBackgroundImage) : base()
         {
             UtilsClass = utilsClassInstance;
             powerMeter = minPower;
             isIncreasing = true;
             barBackground = barBackgroundImage;
+            maxRepeatAmount = UtilsClass.MaxRepeatAmount();
         }
 
         public void GetObjectPosition(Vector2 objectTilePosition, Vector2 playerWorldPosition)
@@ -96,7 +100,6 @@ namespace SmithYourself
             if (isIncreasing)
             {
                 powerMeter += ModEntry.Config.MinigameBarIncrement;
-                // powerMeter += 0.02f;
                 if (powerMeter >= maxPower)
                 {
                     isIncreasing = false;
@@ -105,7 +108,6 @@ namespace SmithYourself
             else
             {
                 powerMeter -= ModEntry.Config.MinigameBarIncrement;
-                // powerMeter -= 0.02f;
                 if (powerMeter <= minPower)
                 {
                     isIncreasing = true;
@@ -140,35 +142,61 @@ namespace SmithYourself
                 }
             }
         }
+
+        public void afterSwingAnimation(Farmer who)
+        {
+            Game1.playSound("parry");
+            if (!ModEntry.isMinigameOpen)
+            {
+                who.toolOverrideFunction = null;
+                return;
+            }
+        }
+
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
             Item currentItem = Game1.player.CurrentItem;
             Game1.player.faceDirection(Game1.player.FacingDirection);
-            if (currentItem is Tool tool)
+            Game1.player.toolOverrideFunction = afterSwingAnimation;
+            PlayDirectionAnimation(Game1.player.FacingDirection);
+
+            if (currentRepeatAmount < maxRepeatAmount)
             {
-                Game1.player.CurrentToolIndex = tool.IndexOfMenuItemView;
+                minigameScore += UtilsClass.CalculateAttemptScore(powerMeter);
+                currentRepeatAmount++;
             }
 
-            switch (Game1.player.FacingDirection)
+            if (currentRepeatAmount == maxRepeatAmount)
             {
-                case 0:
-                    Game1.player.FarmerSprite.animateOnce(176, 80f, 8);
-                    break;
-                case 1:
-                    Game1.player.FarmerSprite.animateOnce(168, 80f, 8);
-                    break;
-                case 2:
-                    Game1.player.FarmerSprite.animateOnce(160, 80f, 8);
-                    break;
-                case 3:
-                    Game1.player.FarmerSprite.animateOnce(184, 80f, 8);
-                    break;
+                UpgradeResult result = DetermineUpgradeResult(minigameScore, maxRepeatAmount);
+                if (result != UpgradeResult.Failed)
+                    UtilsClass.UpgradeTool(currentItem, result);
+                else
+                    UtilsClass.RemoveMaterial(result);
+
+                UtilsClass.ShowResult(result, currentItem.DisplayName);
+
+                Game1.exitActiveMenu();
+                ModEntry.isMinigameOpen = false;
+                Game1.player.toolOverrideFunction = afterSwingAnimation;
             }
+        }
 
-            UtilsClass.UpgradeTool(currentItem, powerMeter);
+        private UpgradeResult DetermineUpgradeResult(int score, int maxRepeatAmount)
+        {
+            if (score == maxRepeatAmount * (int)UpgradeResult.Critical)
+                return UpgradeResult.Critical;
+            else if (score >= maxRepeatAmount * (int)UpgradeResult.Normal)
+                return UpgradeResult.Normal;
+            else
+                return UpgradeResult.Failed;
+        }
 
-            Game1.exitActiveMenu();
-            ModEntry.isMinigameOpen = false;
+        private void PlayDirectionAnimation(int direction)
+        {
+            int[] animations = { 176, 168, 160, 184 };
+            if (direction >= 0 && direction < animations.Length)
+                Game1.player.FarmerSprite.animateOnce(animations[direction], 80f, 8);
         }
     }
 }
