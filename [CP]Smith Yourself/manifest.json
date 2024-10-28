@@ -1,7 +1,7 @@
 {
   "Name": "Smith Yourself CP",
   "Author": "NamelessTo",
-  "Version": "1.3.3",
+  "Version": "1.5.0",
   "Description": "Add custom anvil to bigCraftable",
   "UniqueID": "NamelessTo.SmithYourselfCP",
   "UpdateKeys": ["Nexus:28301"],
