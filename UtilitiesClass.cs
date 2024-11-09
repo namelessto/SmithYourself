@@ -329,6 +329,11 @@ namespace SmithYourself
 
         public void ShowResult(UpgradeResult result, string displayName)
         {
+            if (displayName == "trash")
+            {
+                displayName = helper.Translation.Get("tool.trash-can");
+            }
+            
             switch (result)
             {
                 case UpgradeResult.Failed:

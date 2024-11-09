@@ -174,7 +174,14 @@ namespace SmithYourself
                 else
                     UtilsClass.RemoveMaterial(result);
 
-                UtilsClass.ShowResult(result, currentItem.DisplayName);
+                if (currentItem.Category == -20)
+                {
+                    UtilsClass.ShowResult(result, "trash");
+                }
+                else
+                {
+                    UtilsClass.ShowResult(result, currentItem.DisplayName);
+                }
 
                 Game1.exitActiveMenu();
                 ModEntry.isMinigameOpen = false;

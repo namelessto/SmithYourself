@@ -1,4 +1,5 @@
 {
+  "tool.trash-can": "Trash Can",
   "tool.empty": "You need to equip a tool.",
   "tool.cant-upgrade": "This tool cannot be upgraded.",
   "tool.max-level": "This tool is already at the highest upgrade level.",
