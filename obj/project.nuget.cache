@@ -1,13 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "J2RDnqXJ5BGnBZu1zgRy7Q0kJpGu6+oxdvOG90EgsYi6Rku3KU5ZnXHHVqVtp8ZXVxWQnLxLAZGF8uMPumjaPg==",
+  "dgSpecHash": "7DVduGGEjfQ=",
   "success": true,
   "projectFilePath": "D:\\Projects\\Stardew Mods\\SmithYourself\\SmithYourself.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.2.0\\pathoschild.stardew.modbuildconfig.4.2.0.nupkg.sha512",
-    "C:\\Users\\shaih\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.28\\microsoft.windowsdesktop.app.ref.6.0.28.nupkg.sha512",
-    "C:\\Users\\shaih\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.28\\microsoft.netcore.app.ref.6.0.28.nupkg.sha512",
-    "C:\\Users\\shaih\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.28\\microsoft.aspnetcore.app.ref.6.0.28.nupkg.sha512"
+    "C:\\Users\\shaih\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.3.2\\pathoschild.stardew.modbuildconfig.4.3.2.nupkg.sha512"
   ],
   "logs": []
 }

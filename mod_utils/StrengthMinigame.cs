@@ -156,6 +156,7 @@ namespace SmithYourself
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
             Item currentItem = Game1.player.CurrentItem;
+            Item newItem = currentItem;
             Game1.player.faceDirection(Game1.player.FacingDirection);
             Game1.player.toolOverrideFunction = afterSwingAnimation;
             PlayDirectionAnimation(Game1.player.FacingDirection);
@@ -170,19 +171,18 @@ namespace SmithYourself
             {
                 UpgradeResult result = DetermineUpgradeResult(minigameScore, maxRepeatAmount);
                 if (result != UpgradeResult.Failed)
-                    UtilsClass.UpgradeTool(currentItem, result);
+                    newItem = UtilsClass.UpgradeTool(currentItem, result);
                 else
                     UtilsClass.RemoveMaterial(result);
 
-                if (currentItem.Category == -20)
+                if (newItem != currentItem)
                 {
-                    UtilsClass.ShowResult(result, "trash");
+                    UtilsClass.ShowResult(result, newItem);
                 }
                 else
                 {
-                    UtilsClass.ShowResult(result, currentItem.DisplayName);
+                    UtilsClass.ShowResult(result, currentItem);
                 }
-
                 Game1.exitActiveMenu();
                 ModEntry.isMinigameOpen = false;
                 Game1.player.toolOverrideFunction = afterSwingAnimation;

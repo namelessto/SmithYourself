@@ -1,8 +1,11 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.GameData.Characters;
 using StardewValley.Menus;
+using StardewValley.Objects.Trinkets;
 using SObject = StardewValley.Object;
 
 namespace SmithYourself
@@ -23,6 +26,8 @@ namespace SmithYourself
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
+            // GeodeMenu
+            // CharacterCustomization
         }
 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -69,23 +74,35 @@ namespace SmithYourself
                 )
                 {
                     Item currentHeldItem = Game1.player.CurrentItem;
-                    bool canUpgrade = UtilsClass.CanUpgradeTool(currentHeldItem);
-
-                    if (isMinigameOpen)
+                    if (currentHeldItem != null)
                     {
-                        return;
+                        bool canUpgrade = UtilsClass.CanUpgradeTool(currentHeldItem);
+                        bool itemIsGeode = UtilsClass.CanBreakGeode(currentHeldItem);
+                        bool canUpgradeTrinket = UtilsClass.CanImproveTrinket(currentHeldItem);
+                        if (isMinigameOpen)
+                        {
+                            return;
+                        }
+                        if (itemIsGeode)
+                        {
+                            Game1.activeClickableMenu = new PlayerGeodeMenu();
+                        }
+                        else if (!Config.SkipMinigame && (canUpgrade || canUpgradeTrinket))
+                        {
+                            StrengthMinigame minigame = new(UtilsClass, minigameBarBackground);
+                            minigame.GetObjectPosition(cursorObject.TileLocation, Game1.player.Position);
+                            Game1.activeClickableMenu = minigame;
+                            isMinigameOpen = true;
+                        }
+                        else if (Config.SkipMinigame && (canUpgrade || canUpgradeTrinket))
+                        {
+                            UtilsClass.UpgradeTool(currentHeldItem, UpgradeResult.Normal);
+                        }
                     }
-
-                    if (!Config.SkipMinigame && canUpgrade)
+                    else
                     {
-                        StrengthMinigame minigame = new(UtilsClass, minigameBarBackground);
-                        minigame.GetObjectPosition(cursorObject.TileLocation, Game1.player.Position);
-                        Game1.activeClickableMenu = minigame;
-                        isMinigameOpen = true;
-                    }
-                    else if (Config.SkipMinigame && canUpgrade)
-                    {
-                        UtilsClass.UpgradeTool(currentHeldItem, UpgradeResult.Normal);
+                        string message = Helper.Translation.Get("tool.empty");
+                        UtilsClass.ShowMessage(message, 2);
                     }
                 }
             }
