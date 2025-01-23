@@ -1,0 +1,66 @@
+﻿using StardewModdingAPI;
+
+namespace SmithYourself
+{
+    internal class GeodeMenuPage
+    {
+        public static void GeodePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        {
+            configMenu.AddPage(
+                mod: manifest,
+                pageId: "geode",
+                () => helper.Translation.Get("menu.geode-page")
+            );
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.enable-all-geode-open"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["all"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["all"] = value
+            );
+
+            string mainText = helper.Translation.Get("menu.enable-geode-open") + " ";
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => mainText + helper.Translation.Get("geode.geode"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["535"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["535"] = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => mainText + helper.Translation.Get("geode.frozen-geode"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["536"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["536"] = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => mainText + helper.Translation.Get("geode.magma-geode"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["537"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["537"] = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => mainText + helper.Translation.Get("geode.omni-geode"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["749"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["749"] = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => mainText + helper.Translation.Get("geode.box"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["MysteryBox"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["MysteryBox"] = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => mainText + helper.Translation.Get("geode.gold-box"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["GoldenMysteryBox"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["GoldenMysteryBox"] = value
+            );
+        }
+    }
+}

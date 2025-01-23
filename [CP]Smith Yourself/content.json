@@ -25,9 +25,6 @@
       "Target": "Data/Mail",
       "Entries": {
         "{{ModId}}.ReceiveAnvil": "{{i18n:anvil.mail | item ={{ModId}}.SmithAnvil}}"
-      },
-      "When": {
-        "HasFlag": "guildMember"
       }
     },
     {

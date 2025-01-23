@@ -1,303 +1,6 @@
-﻿// using System;
-// using System.Collections.Generic;
-// using System.Linq;
-// using Microsoft.Xna.Framework;
-// using Microsoft.Xna.Framework.Graphics;
-// using SmithYourself;
-// using StardewModdingAPI;
-// using StardewValley.Extensions;
-// using StardewValley.TerrainFeatures;
-
-// namespace StardewValley.Menus;
-
-// public class PlayerGeodeMenu : MenuWithInventory
-// {
-//     public FarmerSprite player;
-//     public ClickableComponent geodeSpot;
-//     public Item geodeTreasureOverride;
-//     public const int region_geodeSpot = 998;
-
-//     public AnimatedSprite clint;
-
-//     public TemporaryAnimatedSprite geodeDestructionAnimation;
-
-//     public TemporaryAnimatedSprite sparkle;
-
-//     public int geodeAnimationTimer;
-
-//     public int yPositionOfGem;
-
-//     public int alertTimer;
-
-//     public float delayBeforeShowArtifactTimer;
-
-//     public Item geodeTreasure;
-
-//     public bool waitingForServerResponse;
-
-//     private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
-//     public PlayerGeodeMenu() : base(null, okButton: true, trashCan: true, 12, 132)
-//     {
-//         if (yPositionOnScreen == borderWidth + spaceToClearTopBorder)
-//         {
-//             movePosition(0, -spaceToClearTopBorder);
-//         }
-//         inventory.highlightMethod = highlightGeodes;
-//         geodeSpot = new ClickableComponent(new Rectangle(xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + IClickableMenu.borderWidth / 2, yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + 4, 560, 308), "")
-//         {
-//             myID = 998,
-//             downNeighborID = 0
-//         };
-//         player = Game1.player.FarmerSprite;
-//         List<ClickableComponent> list = inventory.inventory;
-//         if (list != null && list.Count >= 12)
-//         {
-//             for (int i = 0; i < 12; i++)
-//             {
-//                 if (inventory.inventory[i] != null)
-//                 {
-//                     inventory.inventory[i].upNeighborID = 998;
-//                 }
-//             }
-//         }
-
-//         player.loop = false;
-//         if (trashCan != null)
-//         {
-//             trashCan.myID = 106;
-//         }
-
-//         if (okButton != null)
-//         {
-//             okButton.leftNeighborID = 11;
-//         }
-
-//         if (Game1.options.SnappyMenus)
-//         {
-//             populateClickableComponentList();
-//             snapToDefaultClickableComponent();
-//         }
-//     }
-//     public override void snapToDefaultClickableComponent()
-//     {
-//         currentlySnappedComponent = getComponentWithID(0);
-//         snapCursorToCurrentSnappedComponent();
-//     }
-//     public override bool readyToClose()
-//     {
-//         if (base.readyToClose() && geodeAnimationTimer <= 0 && base.heldItem == null)
-//         {
-//             return !waitingForServerResponse;
-//         }
-
-//         return false;
-//     }
-//     // public virtual void startGeodeCrack()
-//     // {
-//     //     geodeSpot.item = base.heldItem.getOne();
-//     //     base.heldItem = base.heldItem.ConsumeStack(1);
-//     //     // geodeAnimationTimer = 2700;
-//     //     Game1.player.Money -= 25;
-//     //     Game1.playSound("stoneStep");
-//     //     player.animateOnce(176, 80f, 8);
-//     // }
-
-//     public virtual void startGeodeCrack()
-//     {
-//         if (base.heldItem != null && Utility.IsGeode(base.heldItem))
-//         {
-//             // Set the geode item and consume it
-//             geodeSpot.item = base.heldItem.getOne();
-//             base.heldItem = base.heldItem.ConsumeStack(1);
-
-//             // Deduct cost
-//             Game1.player.Money -= 25;
-
-//             // Play sound effect
-//             Game1.playSound("stoneStep");
-
-//             // Set the animation timer
-//             geodeAnimationTimer = 2700;
-
-//             // Set player's cracking animation
-//             player.setCurrentAnimation(new List<FarmerSprite.AnimationFrame>
-//         {
-//             new FarmerSprite.AnimationFrame(176, 300),
-//             new FarmerSprite.AnimationFrame(177, 200),
-//             new FarmerSprite.AnimationFrame(178, 80),
-//             new FarmerSprite.AnimationFrame(179, 200),
-//             new FarmerSprite.AnimationFrame(180, 100),
-//             new FarmerSprite.AnimationFrame(176, 300)
-//         });
-//             player.loop = false; // Ensure the animation does not loop
-//         }
-//     }
-
-//     public bool highlightGeodes(Item i)
-//     {
-//         if (base.heldItem == null)
-//         {
-//             return Utility.IsGeode(i);
-//         }
-
-//         return true;
-//     }
-
-//     public override void receiveLeftClick(int x, int y, bool playSound = true)
-//     {
-//         if (waitingForServerResponse)
-//         {
-//             return;
-//         }
-
-//         base.receiveLeftClick(x, y, playSound: true);
-//         if (!geodeSpot.containsPoint(x, y))
-//         {
-//             return;
-//         }
-
-//         if (base.heldItem != null && Utility.IsGeode(base.heldItem) && Game1.player.Money >= 25 && geodeAnimationTimer <= 0)
-//         {
-//             int num = Game1.player.freeSpotsInInventory();
-//             if (num > 1 || (num == 1 && base.heldItem.Stack == 1))
-//             {
-//                 if (base.heldItem.QualifiedItemId == "(O)791" && !Game1.netWorldState.Value.GoldenCoconutCracked)
-//                 {
-//                     waitingForServerResponse = true;
-//                     Game1.player.team.goldenCoconutMutex.RequestLock(delegate
-//                     {
-//                         waitingForServerResponse = false;
-//                         geodeTreasureOverride = ItemRegistry.Create("(O)73");
-//                         startGeodeCrack();
-//                     }, delegate
-//                     {
-//                         waitingForServerResponse = false;
-//                         startGeodeCrack();
-//                     });
-//                 }
-//                 else
-//                 {
-//                     startGeodeCrack();
-//                 }
-//             }
-//             else
-//             {
-//                 descriptionText = Game1.content.LoadString("Strings\\UI:GeodeMenu_InventoryFull");
-//                 wiggleWordsTimer = 500;
-//                 alertTimer = 1500;
-//             }
-//         }
-//         else if (Game1.player.Money < 25)
-//         {
-//             wiggleWordsTimer = 500;
-//             Game1.dayTimeMoneyBox.moneyShakeTimer = 1000;
-//         }
-//     }
-//     public override void receiveRightClick(int x, int y, bool playSound = true)
-//     {
-//         base.receiveRightClick(x, y, playSound: true);
-//     }
-//     public override void performHoverAction(int x, int y)
-//     {
-//         if (alertTimer > 0)
-//         {
-//             return;
-//         }
-
-//         base.performHoverAction(x, y);
-//         if (descriptionText.Equals(""))
-//         {
-//             if (Game1.player.Money < 25)
-//             {
-//                 descriptionText = Game1.content.LoadString("Strings\\UI:GeodeMenu_Description_NotEnoughMoney");
-//             }
-//             else
-//             {
-//                 descriptionText = Game1.content.LoadString("Strings\\UI:GeodeMenu_Description");
-//             }
-//         }
-//     }
-//     public override void emergencyShutDown()
-//     {
-//         base.emergencyShutDown();
-//         if (base.heldItem != null)
-//         {
-//             Game1.player.addItemToInventoryBool(base.heldItem);
-//         }
-//     }
-//     public override void update(GameTime time)
-//     {
-//         base.update(time);
-//         player.AnimateRight(time);
-//     }
-//     public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
-//     {
-//         base.gameWindowSizeChanged(oldBounds, newBounds);
-//         Vector2 topLeftPositionForCenteringOnScreen = Utility.getTopLeftPositionForCenteringOnScreen(width, height);
-//         xPositionOnScreen = (int)topLeftPositionForCenteringOnScreen.X;
-//         yPositionOnScreen = (int)topLeftPositionForCenteringOnScreen.Y;
-//         Item item = geodeSpot.item;
-//         geodeSpot = new ClickableComponent(new Rectangle(xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + IClickableMenu.borderWidth / 2, yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + 4, 560, 308), "Anvil");
-//         geodeSpot.item = item;
-//         int yPosition = yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + IClickableMenu.borderWidth + 192 - 16 + 128 + 4;
-//         if (okButton != null)
-//         {
-//             okButton = new ClickableTextureComponent(new Rectangle(xPositionOnScreen + width + 4, yPositionOnScreen + height - 192 - IClickableMenu.borderWidth, 64, 64), Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46), 1f)
-//             {
-//                 myID = 4857,
-//                 upNeighborID = 5948,
-//                 leftNeighborID = 12
-//             };
-//         }
-
-//         if (trashCan != null)
-//         {
-//             trashCan = new ClickableTextureComponent(new Rectangle(xPositionOnScreen + width + 4, yPositionOnScreen + height - 192 - 32 - IClickableMenu.borderWidth - 104, 64, 104), Game1.mouseCursors, new Rectangle(564 + Game1.player.trashCanLevel * 18, 102, 18, 26), 4f)
-//             {
-//                 myID = 5948,
-//                 downNeighborID = 4857,
-//                 leftNeighborID = 12,
-//                 upNeighborID = 106
-//             };
-//         }
-
-//         inventory = new InventoryMenu(xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + IClickableMenu.borderWidth / 2 + 12, yPosition, playerInventory: false, null, inventory.highlightMethod);
-//     }
-//     public override void draw(SpriteBatch b)
-//     {
-//         if (!Game1.options.showClearBackgrounds)
-//         {
-//             b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
-//         }
-
-//         base.draw(b);
-//         b.Draw(Game1.mouseCursors, new Vector2(geodeSpot.bounds.X, geodeSpot.bounds.Y), new Rectangle(0, 512, 140, 78), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.87f);
-
-//         Game1.dayTimeMoneyBox.drawMoneyBox(b);
-
-//         if (!hoverText.Equals(""))
-//         {
-//             IClickableMenu.drawHoverText(b, hoverText, Game1.smallFont);
-//         }
-//         Game1.player.FarmerRenderer.draw(
-//             b,
-//             Game1.player,
-//             player.CurrentFrame,
-//             new Vector2(geodeSpot.bounds.X + 430, geodeSpot.bounds.Y + 128),
-//             1f,
-//             flip: true
-//         );
-//         base.heldItem?.drawInMenu(b, new Vector2(Game1.getOldMouseX() + 8, Game1.getOldMouseY() + 8), 1f);
-//         if (!Game1.options.hardwareCursor)
-//         {
-//             drawMouse(b);
-//         }
-//     }
-// }
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SmithYourself;
-using StardewModdingAPI;
 using StardewValley.Extensions;
 
 namespace StardewValley.Menus;
@@ -305,30 +8,18 @@ namespace StardewValley.Menus;
 public class PlayerGeodeMenu : MenuWithInventory
 {
     public const int region_geodeSpot = 998;
-
     public ClickableComponent geodeSpot;
-
     public AnimatedSprite playerSprite;
-
     public TemporaryAnimatedSprite geodeDestructionAnimation;
-
     public TemporaryAnimatedSprite sparkle;
-
     public int geodeAnimationTimer;
-
     public int yPositionOfGem;
-
     public int alertTimer;
-
     public float delayBeforeShowArtifactTimer;
-
     public Item geodeTreasure;
-
     public Item geodeTreasureOverride;
-
     public bool waitingForServerResponse;
-
-    private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
+    private TemporaryAnimatedSpriteList fluffSprites = new();
 
     public PlayerGeodeMenu()
         : base(null, okButton: true, trashCan: true, 12, 132)
@@ -357,7 +48,6 @@ public class PlayerGeodeMenu : MenuWithInventory
                 }
             }
         }
-        // playerSprite.CurrentFrame = 176;
         if (trashCan != null)
         {
             trashCan.myID = 106;
@@ -395,7 +85,7 @@ public class PlayerGeodeMenu : MenuWithInventory
     {
         if (base.heldItem == null)
         {
-            return Utility.IsGeode(i);
+            return Utility.IsGeode(i) && ModEntry.Config.GeodeAllowances[ToolType.Geode][i.ItemId];
         }
 
         return true;
@@ -410,14 +100,14 @@ public class PlayerGeodeMenu : MenuWithInventory
         playerSprite.SetOwner(Game1.player);
         playerSprite.setCurrentAnimation(new List<FarmerSprite.AnimationFrame>
         {
-            new FarmerSprite.AnimationFrame(6, 45),
-            new FarmerSprite.AnimationFrame(30, 45),
-            new FarmerSprite.AnimationFrame(31, 45),
-            new FarmerSprite.AnimationFrame(32, 45),
-            new FarmerSprite.AnimationFrame(33, 45),
-            new FarmerSprite.AnimationFrame(34, 45),
-            new FarmerSprite.AnimationFrame(35, 45),
-            new FarmerSprite.AnimationFrame(6, 45),
+            new(6, 40),
+            new(30, 40),
+            new(31, 40),
+            new(32, 40),
+            new(33, 40),
+            new(34, 40),
+            new(35, 40),
+            new(6, 40),
         });
         playerSprite.loop = false;
 
@@ -467,11 +157,6 @@ public class PlayerGeodeMenu : MenuWithInventory
                 alertTimer = 1500;
             }
         }
-        // else if (Game1.player.Money < 25)
-        // {
-        //     wiggleWordsTimer = 500;
-        //     Game1.dayTimeMoneyBox.moneyShakeTimer = 1000;
-        // }
     }
 
     public override void receiveRightClick(int x, int y, bool playSound = true)
@@ -826,7 +511,6 @@ public class PlayerGeodeMenu : MenuWithInventory
             sparkle?.draw(b, localPosition: true);
         }
 
-        // clint.draw(b, new Vector2(geodeSpot.bounds.X + 384, geodeSpot.bounds.Y + 64), 0.877f);
         Game1.player.FarmerRenderer.draw(
             b,
             Game1.player,

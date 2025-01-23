@@ -73,7 +73,7 @@ namespace SmithYourself
         };
         public Dictionary<ToolType, Dictionary<string, bool>> TrinketAllowances { get; set; } = new Dictionary<ToolType, Dictionary<string, bool>>
         {
-            { ToolType.Trinket,       new Dictionary<string, bool> { { "all", true },{"IceRod",true}, {"IridiumSpur",true},{"FairyBox",true},{"ParrotEgg",true},} },
+            { ToolType.Trinket,     new Dictionary<string, bool> { { "all", true },{"IceRod",true}, {"IridiumSpur",true},{"FairyBox",true},{"ParrotEgg",true},{"MagicQuiver",true}} },
         };
 
         public Dictionary<ToolType, List<string>> ToolID { get; set; } = new Dictionary<ToolType, List<string>>
@@ -87,7 +87,7 @@ namespace SmithYourself
             { ToolType.Pan,         new List<string> { "Pan", "SteelPan", "GoldPan", "IridiumPan"} },
             { ToolType.Scythe,      new List<string> { "(W)47", "(W)53", "(W)66"} },
             { ToolType.Geode,       new List<string> { "535", "536", "537", "749", "MysteryBox", "GoldenMysteryBox"} },
-            { ToolType.Trinket,      new List<string> { "BasiliskPaw", "FrogEgg", "MagicHairDye", "IceRod","IridiumSpur", "FairyBox","ParrotEgg"} },
+            { ToolType.Trinket,     new List<string> { "BasiliskPaw", "FrogEgg", "MagicHairDye", "IceRod","IridiumSpur", "FairyBox","ParrotEgg","MagicQuiver"} },
             { ToolType.Bag,         new List<string> { "12", "24", "36"} },
         };
     }

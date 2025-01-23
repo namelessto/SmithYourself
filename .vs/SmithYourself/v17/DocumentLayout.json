@@ -9,6 +9,18 @@
     {
       "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\modentry.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:modentry.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\mod_menu\\toolsmenupage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:mod_menu\\toolsmenupage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\mod_menu\\trinketmenupage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:mod_menu\\trinketmenupage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|d:\\projects\\stardew mods\\smithyourself\\mod_menu\\modmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E292C7E7-1A0F-49B3-9DFB-5E33AEFEA419}|SmithYourself.csproj|solutionrelative:mod_menu\\modmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,8 +30,44 @@
       "DocumentGroups": [
         {
           "DockedWidth": 216,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 4,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ToolsMenuPage.cs",
+              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\mod_menu\\ToolsMenuPage.cs",
+              "RelativeDocumentMoniker": "mod_menu\\ToolsMenuPage.cs",
+              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\mod_menu\\ToolsMenuPage.cs",
+              "RelativeToolTip": "mod_menu\\ToolsMenuPage.cs",
+              "ViewState": "AgIAAEMDAAAAAAAAAADgv1EDAABSAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-22T17:58:31.212Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "TrinketMenuPage.cs",
+              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\mod_menu\\TrinketMenuPage.cs",
+              "RelativeDocumentMoniker": "mod_menu\\TrinketMenuPage.cs",
+              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\mod_menu\\TrinketMenuPage.cs",
+              "RelativeToolTip": "mod_menu\\TrinketMenuPage.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-22T17:58:10.73Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ModMenu.cs",
+              "DocumentMoniker": "D:\\Projects\\Stardew Mods\\SmithYourself\\mod_menu\\ModMenu.cs",
+              "RelativeDocumentMoniker": "mod_menu\\ModMenu.cs",
+              "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\mod_menu\\ModMenu.cs",
+              "RelativeToolTip": "mod_menu\\ModMenu.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-22T17:48:29.735Z"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -28,9 +76,10 @@
               "RelativeDocumentMoniker": "ModEntry.cs",
               "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\ModEntry.cs",
               "RelativeToolTip": "ModEntry.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABgAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAADsAAAAAAAAAAAA2wF4AAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-22T16:47:14.501Z"
+              "WhenOpened": "2025-01-22T16:47:14.501Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -40,7 +89,7 @@
               "RelativeDocumentMoniker": "mod_utils\\UtilitiesClass.cs",
               "ToolTip": "D:\\Projects\\Stardew Mods\\SmithYourself\\mod_utils\\UtilitiesClass.cs",
               "RelativeToolTip": "mod_utils\\UtilitiesClass.cs",
-              "ViewState": "AgIAAL8AAAAAAAAAAADgv9YAAABKAAAAAAAAAA==",
+              "ViewState": "AgIAAMcAAAAAAAAAAAASwNMAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-22T16:46:47.088Z",
               "EditorCaption": ""

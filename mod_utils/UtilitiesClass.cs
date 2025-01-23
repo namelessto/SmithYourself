@@ -35,6 +35,7 @@ namespace SmithYourself
 
         public bool CanBreakGeode(Item item)
         {
+            string message;
             bool itemIsGeode = false;
             if (config.ToolID[ToolType.Geode].Contains(item.ItemId))
             {
@@ -53,6 +54,8 @@ namespace SmithYourself
                 }
                 else
                 {
+                    message = helper.Translation.Get("geode.disabled");
+                    ShowMessage(message, HUDMessage.error_type);
                     return false;
                 }
             }
@@ -160,7 +163,6 @@ namespace SmithYourself
 
                     if (currentItem is Tool currentTool)
                     {
-                        // toolUpgradeData.ToolLevel = currentTool.UpgradeLevel;
                         toolUpgradeData.ToolLevel = currentTool.ItemId switch
                         {
                             "47" => 0,
@@ -218,6 +220,9 @@ namespace SmithYourself
                 case ToolType.Trash:
                     toolUpgradeData.ToolLevel = Game1.player.trashCanLevel;
                     break;
+                case ToolType.Rod:
+                    toolUpgradeData.ToolLevel = (toolUpgradeData.ToolLevel == 0 && ModEntry.Config.SkipTrainingRod) ? toolUpgradeData.ToolLevel + 1 : toolUpgradeData.ToolLevel;
+                    break;
                 default:
                     break;
             }
@@ -250,6 +255,13 @@ namespace SmithYourself
         private bool IsUpgradeAllowed(ToolType toolClassType, int toolLevel)
         {
             string message;
+            int maxLevel = config.UpgradeItemsId[toolClassType].Count;
+            maxLevel = toolClassType switch
+            {
+                ToolType.Pan => maxLevel + 2,
+                ToolType.Bag => (maxLevel + 1) * 12,
+                _ => maxLevel
+            };
             if (!config.UpgradeAllowances.TryGetValue(toolClassType, out var allowances))
             {
                 message = helper.Translation.Get("tool.cant-upgrade");
@@ -257,7 +269,7 @@ namespace SmithYourself
                 return false;
             }
 
-            if (toolUpgradeData.ToolLevel == config.UpgradeAllowances[toolUpgradeData.ToolClassType].Count - 1)
+            if (toolUpgradeData.ToolLevel == maxLevel)
             {
                 message = helper.Translation.Get("tool.max-level");
                 ShowMessage(message, HUDMessage.newQuest_type);
@@ -448,11 +460,8 @@ namespace SmithYourself
         private string GetNextLevelId()
         {
             int nextLevel;
-            if (toolUpgradeData.ToolClassType == ToolType.Rod)
-            {
-                nextLevel = (toolUpgradeData.ToolLevel == 0 && !ModEntry.Config.SkipTrainingRod) ? toolUpgradeData.ToolLevel + 1 : toolUpgradeData.ToolLevel + 2;
-            }
-            else if (toolUpgradeData.ToolClassType == ToolType.Pan)
+
+            if (toolUpgradeData.ToolClassType == ToolType.Pan)
             {
                 nextLevel = toolUpgradeData.ToolLevel;
             }
@@ -497,7 +506,7 @@ namespace SmithYourself
                 {
                     return trinket;
                 }
-                int newSeed = Game1.random.Next(trinket.generationSeed.Value);
+                int newSeed = Game1.random.Next();
                 trinket.RerollStats(newSeed);
                 currentStats = trinket.descriptionSubstitutionTemplates;
 
@@ -584,7 +593,7 @@ namespace SmithYourself
                 "FairyBox" => basicStatOne == 5,
                 "IridiumSpur" => basicStatOne == 10,
                 "IceRod" => advancedStatOne == 3 && advancedStatTwo == 4,
-                "MagicQuiver" => advancedStatOne == 0.9 && advancedStatTwo == 30,
+                "MagicQuiver" => Math.Round(advancedStatOne, 1) == 0.9 && advancedStatTwo == 30,
                 _ => false
             };
         }
@@ -600,6 +609,7 @@ namespace SmithYourself
                 ToolType.Pickaxe => Game1.player.MiningLevel,
                 ToolType.WateringCan => Game1.player.FarmingLevel,
                 ToolType.Rod => Game1.player.FishingLevel,
+                ToolType.Trinket => Game1.player.CombatLevel,
                 _ => Game1.player.Level
             };
         }
@@ -611,7 +621,6 @@ namespace SmithYourself
             if (toolUpgradeData.ToolClassType == ToolType.Trash)
             {
                 toolTypeName = ItemRegistry.Create(config.ToolID[ToolType.Trash][Game1.player.trashCanLevel], 1).DisplayName;
-                // toolTypeName = helper.Translation.Get("tool.trash-can");
             }
             else if (toolUpgradeData.ToolClassType == ToolType.Bag)
             {

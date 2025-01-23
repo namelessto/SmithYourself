@@ -1,12 +1,31 @@
 ﻿using StardewModdingAPI;
 
-namespace SmithYourself
+namespace SmithYourself.mod_menu
 {
-    internal class ModMenu
+    internal class ToolsMenuPage
     {
-        public static void BuildMenu(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        private static string TierOneItemID = "";
+        private static string TierOneItemQuantity = "";
+        private static string TierTwoItemID = "";
+        private static string TierTwoItemQuantity = "";
+        private static string TierThreeItemID = "";
+        private static string TierThreeItemQuantity = "";
+        private static string TierFourItemID = "";
+        private static string TierFourItemQuantity = "";
+
+        public ToolsMenuPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
-            MainPage(helper, manifest, configMenu);
+            TierOneItemID = helper.Translation.Get("menu.tier-one") + " " + helper.Translation.Get("menu.item-id");
+            TierOneItemQuantity = helper.Translation.Get("menu.tier-one") + " " + helper.Translation.Get("menu.item-quantity");
+
+            TierTwoItemID = helper.Translation.Get("menu.tier-two") + " " + helper.Translation.Get("menu.item-id");
+            TierTwoItemQuantity = helper.Translation.Get("menu.tier-two") + " " + helper.Translation.Get("menu.item-quantity");
+
+            TierThreeItemID = helper.Translation.Get("menu.tier-three") + " " + helper.Translation.Get("menu.item-id");
+            TierThreeItemQuantity = helper.Translation.Get("menu.tier-three") + " " + helper.Translation.Get("menu.item-quantity");
+
+            TierFourItemID = helper.Translation.Get("menu.tier-four") + " " + helper.Translation.Get("menu.item-id");
+            TierFourItemQuantity = helper.Translation.Get("menu.tier-four") + " " + helper.Translation.Get("menu.item-quantity");
             configMenu.AddPageLink(mod: manifest,
                 pageId: "axe",
                 () => helper.Translation.Get("menu.axe-page")
@@ -36,87 +55,16 @@ namespace SmithYourself
                 () => helper.Translation.Get("menu.scythe-page")
             );
             configMenu.AddPageLink(mod: manifest,
-                pageId: "geode",
-                () => helper.Translation.Get("menu.geode-page")
+                pageId: "pan",
+                () => helper.Translation.Get("menu.pan-page")
             );
-            AxePage(helper, manifest, configMenu);
-            PickaxePage(helper, manifest, configMenu);
-            HoePage(helper, manifest, configMenu);
-            TrashPage(helper, manifest, configMenu);
-            WateringCanPage(helper, manifest, configMenu);
-            RodPage(helper, manifest, configMenu);
-            ScythePage(helper, manifest, configMenu);
-            GeodePage(helper, manifest, configMenu);
-        }
-        private static void MainPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
-        {
-            configMenu.AddSectionTitle(
-                mod: manifest,
-                text: () => helper.Translation.Get("menu.main-title")
-            );
-
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.skip-minigame"),
-                getValue: () => ModEntry.Config.SkipMinigame,
-                setValue: value => ModEntry.Config.SkipMinigame = value
-            );
-
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.simple-minigame"),
-                tooltip: () => helper.Translation.Get("menu.simple-minigame-tooltip"),
-                getValue: () => ModEntry.Config.SimpleMinigame,
-                setValue: value => ModEntry.Config.SimpleMinigame = value
-            );
-
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.allow-fail"),
-                tooltip: () => helper.Translation.Get("menu.allow-fail-tooltip"),
-                getValue: () => ModEntry.Config.AllowFail,
-                setValue: value => ModEntry.Config.AllowFail = value
-            );
-
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.fail-point"),
-                getValue: () => ModEntry.Config.FailPoint,
-                setValue: value => ModEntry.Config.FailPoint = value,
-                min: 0f,
-                max: 1f,
-                formatValue: value => $"{Math.Round(value * 100)}%",
-                interval: 0.01f
-            );
-
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.minigame-speed"),
-                tooltip: () => helper.Translation.Get("menu.minigame-speed-tooltip"),
-                getValue: () => ModEntry.Config.MinigameBarIncrement,
-                setValue: value => ModEntry.Config.MinigameBarIncrement = value,
-                min: 0.01f,
-                max: 0.1f,
-                formatValue: value => $"{Math.Round(value * 100)}%",
-                interval: 0.01f
-            );
-
-            configMenu.AddSectionTitle(
-                mod: manifest,
-                text: () => helper.Translation.Get("menu.material-title")
-            );
-
-            configMenu.AddParagraph(
-                mod: manifest,
-                text: () => helper.Translation.Get("menu.material-text")
-            );
-
-            configMenu.AddParagraph(
-                mod: manifest,
-                text: () => helper.Translation.Get("menu.upgrade-tool-text")
+            configMenu.AddPageLink(mod: manifest,
+                pageId: "bag",
+                () => helper.Translation.Get("menu.bag-page")
             );
         }
-        private static void AxePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+
+        public static void AxePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
             configMenu.AddPage(
                 mod: manifest,
@@ -140,13 +88,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.tier-one") + " " + helper.Translation.Get("menu.item-id"),
+                name: () => TierOneItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Axe][0],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Axe][0] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.tier-one") + " " + helper.Translation.Get("menu.item-quantity"),
+                name: () => TierOneItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Axe][0],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Axe][0] = value,
                 min: 0
@@ -161,13 +109,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-id"),
+                name: () => TierTwoItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Axe][1],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Axe][1] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-amount"),
+                name: () => TierTwoItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Axe][1],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Axe][1] = value,
                 min: 0
@@ -182,13 +130,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-id"),
+                name: () => TierThreeItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Axe][2],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Axe][2] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-amount"),
+                name: () => TierThreeItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Axe][2],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Axe][2] = value,
                 min: 0
@@ -203,19 +151,19 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-id"),
+                name: () => TierFourItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Axe][3],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Axe][3] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-amount"),
+                name: () => TierFourItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Axe][3],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Axe][3] = value,
                 min: 0
             );
         }
-        private static void PickaxePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        public static void PickaxePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
             configMenu.AddPage(
                 mod: manifest,
@@ -239,13 +187,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-id"),
+                name: () => TierOneItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Pickaxe][0],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Pickaxe][0] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-amount"),
+                name: () => TierOneItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][0],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][0] = value,
                 min: 0
@@ -260,13 +208,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-id"),
+                name: () => TierTwoItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Pickaxe][1],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Pickaxe][1] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-amount"),
+                name: () => TierTwoItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][1],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][1] = value,
                 min: 0
@@ -281,13 +229,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-id"),
+                name: () => TierThreeItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Pickaxe][2],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Pickaxe][2] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-amount"),
+                name: () => TierThreeItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][2],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][2] = value,
                 min: 0
@@ -302,19 +250,19 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-id"),
+                name: () => TierFourItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Pickaxe][3],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Pickaxe][3] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-amount"),
+                name: () => TierFourItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][3],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][3] = value,
                 min: 0
             );
         }
-        private static void HoePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        public static void HoePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
             configMenu.AddPage(
                 mod: manifest,
@@ -337,13 +285,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-id"),
+                name: () => TierOneItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Hoe][0],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Hoe][0] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-amount"),
+                name: () => TierOneItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][0],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][0] = value,
                 min: 0
@@ -358,13 +306,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-id"),
+                name: () => TierTwoItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Hoe][1],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Hoe][1] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-amount"),
+                name: () => TierTwoItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][1],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][1] = value,
                 min: 0
@@ -379,13 +327,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-id"),
+                name: () => TierThreeItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Hoe][2],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Hoe][2] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-amount"),
+                name: () => TierThreeItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][2],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][2] = value,
                 min: 0
@@ -400,19 +348,19 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-id"),
+                name: () => TierFourItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Hoe][3],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Hoe][3] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-amount"),
+                name: () => TierFourItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][3],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][3] = value,
                 min: 0
             );
         }
-        private static void TrashPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        public static void TrashPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
             configMenu.AddPage(
                 mod: manifest,
@@ -435,13 +383,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-id"),
+                name: () => TierOneItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trash][0],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trash][0] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-amount"),
+                name: () => TierOneItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trash][0],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trash][0] = value,
                 min: 0
@@ -456,13 +404,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-id"),
+                name: () => TierTwoItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trash][1],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trash][1] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-amount"),
+                name: () => TierTwoItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trash][1],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trash][1] = value,
                 min: 0
@@ -477,13 +425,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-id"),
+                name: () => TierThreeItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trash][2],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trash][2] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-amount"),
+                name: () => TierThreeItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trash][2],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trash][2] = value,
                 min: 0
@@ -498,19 +446,19 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-id"),
+                name: () => TierFourItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trash][3],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trash][3] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-amount"),
+                name: () => TierFourItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trash][3],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trash][3] = value,
                 min: 0
             );
         }
-        private static void WateringCanPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        public static void WateringCanPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
             configMenu.AddPage(
                 mod: manifest,
@@ -533,13 +481,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-id"),
+                name: () => TierOneItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.WateringCan][0],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.WateringCan][0] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-amount"),
+                name: () => TierOneItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][0],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][0] = value,
                 min: 0
@@ -554,13 +502,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-id"),
+                name: () => TierTwoItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.WateringCan][1],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.WateringCan][1] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-amount"),
+                name: () => TierTwoItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][1],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][1] = value,
                 min: 0
@@ -575,13 +523,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-id"),
+                name: () => TierThreeItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.WateringCan][2],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.WateringCan][2] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-amount"),
+                name: () => TierThreeItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][2],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][2] = value,
                 min: 0
@@ -596,19 +544,19 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-id"),
+                name: () => TierFourItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.WateringCan][3],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.WateringCan][3] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-amount"),
+                name: () => TierFourItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][3],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][3] = value,
                 min: 0
             );
         }
-        private static void RodPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        public static void RodPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
             configMenu.AddPage(
                 mod: manifest,
@@ -637,13 +585,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-id"),
+                name: () => TierOneItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Rod][0],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Rod][0] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-amount"),
+                name: () => TierOneItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Rod][0],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Rod][0] = value,
                 min: 0
@@ -658,13 +606,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-id"),
+                name: () => TierTwoItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Rod][1],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Rod][1] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-amount"),
+                name: () => TierTwoItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Rod][1],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Rod][1] = value,
                 min: 0
@@ -679,13 +627,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-id"),
+                name: () => TierThreeItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Rod][2],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Rod][2] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-three-amount"),
+                name: () => TierThreeItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Rod][2],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Rod][2] = value,
                 min: 0
@@ -700,19 +648,19 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-id"),
+                name: () => TierFourItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Rod][3],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Rod][3] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-four-amount"),
+                name: () => TierFourItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Rod][3],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Rod][3] = value,
                 min: 0
             );
         }
-        private static void ScythePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        public static void ScythePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
             configMenu.AddPage(
                 mod: manifest,
@@ -735,13 +683,13 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-id"),
+                name: () => TierOneItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Scythe][0],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Scythe][0] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-one-amount"),
+                name: () => TierOneItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Scythe][0],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Scythe][0] = value,
                 min: 0
@@ -756,73 +704,151 @@ namespace SmithYourself
             );
             configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-id"),
+                name: () => TierTwoItemID,
                 getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Scythe][1],
                 setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Scythe][1] = value
             );
             configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.level-two-amount"),
+                name: () => TierTwoItemQuantity,
                 getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Scythe][1],
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Scythe][1] = value,
                 min: 0
             );
         }
-        private static void GeodePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+
+        public static void PanPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
         {
             configMenu.AddPage(
                 mod: manifest,
-                pageId: "geode",
-                () => helper.Translation.Get("menu.geode-page")
+                pageId: "pan",
+                () => helper.Translation.Get("menu.pan-page")
             );
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.enable-all-geode-open"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["all"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["all"] = value
+                name: () => helper.Translation.Get("menu.enable-tool-upgrade"),
+                getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Pan][-1],
+                setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Pan][-1] = value
             );
 
-            // Regular geode
+            // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.enable-geode-open") + " geode",
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["535"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["535"] = value
+                name: () => helper.Translation.Get("menu.enable-upgrade"),
+                getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Pan][1],
+                setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Pan][1] = value
             );
-            // Regular geode
-            configMenu.AddBoolOption(
+            configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.enable-geode-open") + " frozen geode",
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["536"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["536"] = value
+                name: () => TierOneItemID,
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Pan][1],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Pan][1] = value
             );
-            // Regular geode
-            configMenu.AddBoolOption(
+            configMenu.AddNumberOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.enable-geode-open") + " magma geode",
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["537"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["537"] = value
+                name: () => TierOneItemQuantity,
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Pan][1],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pan][1] = value,
+                min: 0
             );
-            // Regular geode
+
+            // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.enable-geode-open") + " omni geode",
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["749"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["749"] = value
+                name: () => helper.Translation.Get("menu.enable-upgrade"),
+                getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Pan][2],
+                setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Pan][2] = value
             );
-            // Regular geode
-            configMenu.AddBoolOption(
+            configMenu.AddTextOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.enable-geode-open") + " mystery box",
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["MysteryBox"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["MysteryBox"] = value
+                name: () => TierTwoItemID,
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Pan][2],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Pan][2] = value
             );
-            // Regular geode
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => TierTwoItemQuantity,
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Pan][2],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pan][2] = value,
+                min: 0
+            );
+
+            // Level 3
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.enable-geode-open") + " golden box",
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["GoldenMysteryBox"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["GoldenMysteryBox"] = value
+                name: () => helper.Translation.Get("menu.enable-upgrade"),
+                getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Pan][3],
+                setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Pan][3] = value
+            );
+            configMenu.AddTextOption(
+                mod: manifest,
+                name: () => TierThreeItemID,
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Pan][3],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Pan][3] = value
+            );
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => TierThreeItemQuantity,
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Pan][3],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pan][3] = value,
+                min: 0
+            );
+        }
+
+        public static void BagPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        {
+            configMenu.AddPage(
+                mod: manifest,
+                pageId: "bag",
+                () => helper.Translation.Get("menu.bag-page")
+            );
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.enable-tool-upgrade"),
+                getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Bag][-1],
+                setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Bag][-1] = value
+            );
+
+            // Level 1
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.enable-upgrade"),
+                getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Bag][12],
+                setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Bag][12] = value
+            );
+            configMenu.AddTextOption(
+                mod: manifest,
+                name: () => TierOneItemID,
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Bag][12],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Bag][12] = value
+            );
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => TierOneItemQuantity,
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Bag][12],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Bag][12] = value,
+                min: 0
+            );
+
+            // Level 2
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.enable-upgrade"),
+                getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Bag][24],
+                setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Bag][24] = value
+            );
+            configMenu.AddTextOption(
+                mod: manifest,
+                name: () => TierTwoItemID,
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Bag][24],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Bag][24] = value
+            );
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => TierTwoItemQuantity,
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Bag][24],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Bag][24] = value,
+                min: 0
             );
         }
     }
