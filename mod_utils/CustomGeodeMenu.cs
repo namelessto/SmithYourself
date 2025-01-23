@@ -10,14 +10,14 @@ public class PlayerGeodeMenu : MenuWithInventory
     public const int region_geodeSpot = 998;
     public ClickableComponent geodeSpot;
     public AnimatedSprite playerSprite;
-    public TemporaryAnimatedSprite geodeDestructionAnimation;
-    public TemporaryAnimatedSprite sparkle;
+    public TemporaryAnimatedSprite geodeDestructionAnimation = new();
+    public TemporaryAnimatedSprite sparkle = new();
     public int geodeAnimationTimer;
     public int yPositionOfGem;
     public int alertTimer;
     public float delayBeforeShowArtifactTimer;
-    public Item geodeTreasure;
-    public Item geodeTreasureOverride;
+    public Item geodeTreasure = new StardewValley.Object();
+    public Item geodeTreasureOverride = new StardewValley.Object();
     public bool waitingForServerResponse;
     private TemporaryAnimatedSpriteList fluffSprites = new();
 
@@ -29,14 +29,16 @@ public class PlayerGeodeMenu : MenuWithInventory
             movePosition(0, -IClickableMenu.spaceToClearTopBorder);
         }
 
-        inventory.highlightMethod = highlightGeodes;
+        inventory.highlightMethod = HighlightGeodes;
         geodeSpot = new ClickableComponent(new Rectangle(xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + IClickableMenu.borderWidth / 2, yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + 4, 560, 308), "")
         {
             myID = 998,
             downNeighborID = 0
         };
-        playerSprite = new AnimatedSprite();
-        playerSprite.CurrentFrame = 6;
+        playerSprite = new AnimatedSprite
+        {
+            CurrentFrame = 6
+        };
         List<ClickableComponent> list = inventory.inventory;
         if (list != null && list.Count >= 12)
         {
@@ -81,7 +83,7 @@ public class PlayerGeodeMenu : MenuWithInventory
         return false;
     }
 
-    public bool highlightGeodes(Item i)
+    public bool HighlightGeodes(Item i)
     {
         if (base.heldItem == null)
         {
@@ -91,7 +93,7 @@ public class PlayerGeodeMenu : MenuWithInventory
         return true;
     }
 
-    public virtual void startGeodeCrack()
+    public virtual void StartGeodeCrack()
     {
         geodeSpot.item = base.heldItem.getOne();
         base.heldItem = base.heldItem.ConsumeStack(1);
@@ -138,16 +140,16 @@ public class PlayerGeodeMenu : MenuWithInventory
                     {
                         waitingForServerResponse = false;
                         geodeTreasureOverride = ItemRegistry.Create("(O)73");
-                        startGeodeCrack();
+                        StartGeodeCrack();
                     }, delegate
                     {
                         waitingForServerResponse = false;
-                        startGeodeCrack();
+                        StartGeodeCrack();
                     });
                 }
                 else
                 {
-                    startGeodeCrack();
+                    StartGeodeCrack();
                 }
             }
             else
@@ -439,8 +441,10 @@ public class PlayerGeodeMenu : MenuWithInventory
         xPositionOnScreen = (int)topLeftPositionForCenteringOnScreen.X;
         yPositionOnScreen = (int)topLeftPositionForCenteringOnScreen.Y;
         Item item = geodeSpot.item;
-        geodeSpot = new ClickableComponent(new Rectangle(xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + IClickableMenu.borderWidth / 2, yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + 4, 560, 308), "Anvil");
-        geodeSpot.item = item;
+        geodeSpot = new ClickableComponent(new Rectangle(xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + IClickableMenu.borderWidth / 2, yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + 4, 560, 308), "Anvil")
+        {
+            item = item
+        };
         int yPosition = yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + IClickableMenu.borderWidth + 192 - 16 + 128 + 4;
         if (okButton != null)
         {
@@ -474,7 +478,6 @@ public class PlayerGeodeMenu : MenuWithInventory
         }
 
         base.draw(b);
-        // Game1.dayTimeMoneyBox.drawMoneyBox(b);
         b.Draw(Game1.mouseCursors, new Vector2(geodeSpot.bounds.X, geodeSpot.bounds.Y), new Rectangle(0, 512, 140, 78), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.87f);
         if (geodeSpot.item != null)
         {

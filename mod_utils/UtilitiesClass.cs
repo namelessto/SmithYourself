@@ -539,7 +539,6 @@ namespace SmithYourself
                                                       float originalCooldown, float currentCooldown,
                                                       float originalMinDamage, float currentMinDamage)
         {
-            // Case 1: Checking for name-based improvements
             if (currentTrinketName == "Perfect Magic Quiver")
             {
                 return true;
@@ -549,7 +548,6 @@ namespace SmithYourself
             {
                 if (currentTrinketName == "Rapid Magic Quiver" || currentTrinketName == "Heavy Magic Quiver" || currentTrinketName == "Perfect Magic Quiver")
                 {
-                    // Magic Quiver can improve to Rapid, Heavy, or Perfect
                     return true;
                 }
             }
@@ -558,7 +556,6 @@ namespace SmithYourself
             {
                 if (currentTrinketName == "Rapid Magic Quiver" || currentTrinketName == "Magic Quiver")
                 {
-                    // Heavy Magic Quiver cannot improve to Rapid or Magic Quiver
                     return false;
                 }
             }
@@ -567,7 +564,6 @@ namespace SmithYourself
             {
                 if (currentTrinketName == "Heavy Magic Quiver" || currentTrinketName == "Magic Quiver")
                 {
-                    // Rapid Magic Quiver cannot improve to Heavy or Magic Quiver
                     return false;
                 }
             }
@@ -579,13 +575,12 @@ namespace SmithYourself
             }
             else
             {
-                return false; // Invalid upgrade: cooldown cannot increase
+                return false; 
             }
         }
 
 
-        // Helper method to check if stats have reached maximum limits
-        private bool CheckMaxedStats(Trinket trinket, int basicStatOne, float advancedStatOne, float advancedStatTwo)
+        private static bool CheckMaxedStats(Trinket trinket, int basicStatOne, float advancedStatOne, float advancedStatTwo)
         {
             return trinket.ItemId switch
             {
@@ -598,7 +593,7 @@ namespace SmithYourself
             };
         }
 
-        private int GetRelevantSkillLevel(ToolType toolType)
+        private static int GetRelevantSkillLevel(ToolType toolType)
         {
             return toolType switch
             {
