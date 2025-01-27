@@ -69,17 +69,17 @@ namespace SmithYourself
             bool canUpgradeTrinket = false;
             if (!Context.IsWorldReady)
                 return;
-            if (e.Button == SButton.K)
-            {
-                Game1.activeClickableMenu = new CharacterCustomization(CharacterCustomization.Source.Wizard);
-            }
-            if (e.Button == SButton.L)
-            {
-                monitor.Log($"tool name {Game1.player.CurrentTool.DisplayName}", LogLevel.Debug);
-                Game1.player.animateOnce(184);
-                monitor.Log($"tool index {Game1.player.CurrentTool.ParentSheetIndex}", LogLevel.Debug);
-                monitor.Log($"player facing direction: {Game1.player.facingDirection}", LogLevel.Info);
-            }
+            // if (e.Button == SButton.K)
+            // {
+            //     Game1.activeClickableMenu = new CharacterCustomization(CharacterCustomization.Source.Wizard);
+            // }
+            // if (e.Button == SButton.L)
+            // {
+            //     monitor.Log($"tool name {Game1.player.CurrentTool.DisplayName}", LogLevel.Debug);
+            //     Game1.player.animateOnce(184);
+            //     monitor.Log($"tool index {Game1.player.CurrentTool.ParentSheetIndex}", LogLevel.Debug);
+            //     monitor.Log($"player facing direction: {Game1.player.facingDirection}", LogLevel.Info);
+            // }
             if (minigameBarBackground != null && UtilsClass != null)
             {
                 if (
