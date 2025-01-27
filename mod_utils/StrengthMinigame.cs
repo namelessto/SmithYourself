@@ -19,6 +19,8 @@ namespace SmithYourself
         private int maxRepeatAmount;
         private int currentRepeatAmount = 0;
         private int minigameScore = 0;
+        private int toolIndex = 0;
+        private bool shouldCloseMenu = false;
 
         public StrengthMinigame(UtilitiesClass utilsClassInstance, Texture2D barBackgroundImage) : base()
         {
@@ -73,6 +75,7 @@ namespace SmithYourself
                 0f
             );
 
+
             int barStartY = (int)(barPosition.Y + (backgroundHeight * scale) - 4 * scale - barHeight);
 
             b.Draw(
@@ -91,12 +94,35 @@ namespace SmithYourself
                 1f
             );
 
-            base.draw(b);
             drawMouse(b);
+            if (Game1.IsRenderingNonNativeUIScale())
+            {
+                b.End();
+                Game1.PopUIMode();
+                b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            }
+            if (Game1.player.FarmerSprite.isOnToolAnimation())
+            {
+                Game1.drawTool(Game1.player, toolIndex);
+            }
+            if (Game1.IsRenderingNonNativeUIScale())
+            {
+                b.End();
+                Game1.PushUIMode();
+                b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            }
+            base.draw(b);
         }
 
         public override void update(GameTime time)
         {
+            if (shouldCloseMenu && !Game1.player.FarmerSprite.isOnToolAnimation())
+            {
+                ModEntry.isMinigameOpen = false;
+                Game1.exitActiveMenu();
+                shouldCloseMenu = false;
+                return;
+            }
             if (isIncreasing)
             {
                 powerMeter += ModEntry.Config.MinigameBarIncrement;
@@ -155,12 +181,14 @@ namespace SmithYourself
 
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
+            int[] toolIndexes = { 109, 107, 108, 107 };
+
             Item currentItem = Game1.player.CurrentItem;
             Item newItem = currentItem;
             Game1.player.faceDirection(Game1.player.FacingDirection);
             Game1.player.toolOverrideFunction = afterSwingAnimation;
             PlayDirectionAnimation(Game1.player.FacingDirection);
-
+            toolIndex = toolIndexes[Game1.player.FacingDirection];
             if (currentRepeatAmount < maxRepeatAmount)
             {
                 minigameScore += UtilsClass.CalculateAttemptScore(powerMeter);
@@ -183,9 +211,7 @@ namespace SmithYourself
                 {
                     UtilsClass.ShowResult(result, currentItem);
                 }
-                Game1.exitActiveMenu();
-                ModEntry.isMinigameOpen = false;
-                Game1.player.toolOverrideFunction = afterSwingAnimation;
+                shouldCloseMenu = true;
             }
         }
 
@@ -203,7 +229,9 @@ namespace SmithYourself
         {
             int[] animations = { 176, 168, 160, 184 };
             if (direction >= 0 && direction < animations.Length)
-                Game1.player.FarmerSprite.animateOnce(animations[direction], 80f, 8);
+            {
+                Game1.player.FarmerSprite.animateOnce(animations[direction], 40, 8);
+            }
         }
     }
 }

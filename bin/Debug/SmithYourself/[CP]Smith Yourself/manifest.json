@@ -1,0 +1,17 @@
+{
+  "Name": "Smith Yourself CP",
+  "Author": "NamelessTo",
+  "Version": "1.9.0",
+  "Description": "Add custom anvil to bigCraftable",
+  "UniqueID": "NamelessTo.SmithYourselfCP",
+  "UpdateKeys": ["Nexus:28301"],
+  "Dependencies": [
+    {
+      "UniqueID": "NamelessTo.SmithYourself",
+      "IsRequired": true
+    }
+  ],
+  "ContentPackFor": {
+    "UniqueID": "Pathoschild.ContentPatcher"
+  }
+}

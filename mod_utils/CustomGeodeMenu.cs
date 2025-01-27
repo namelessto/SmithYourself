@@ -1,7 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SmithYourself;
+using StardewModdingAPI;
 using StardewValley.Extensions;
+using StardewValley.Tools;
+using static StardewValley.FarmerSprite;
 
 namespace StardewValley.Menus;
 
@@ -10,16 +13,18 @@ public class PlayerGeodeMenu : MenuWithInventory
     public const int region_geodeSpot = 998;
     public ClickableComponent geodeSpot;
     public AnimatedSprite playerSprite;
-    public TemporaryAnimatedSprite geodeDestructionAnimation = new();
-    public TemporaryAnimatedSprite sparkle = new();
+    public TemporaryAnimatedSprite geodeDestructionAnimation;
+    public TemporaryAnimatedSprite sparkle;
     public int geodeAnimationTimer;
     public int yPositionOfGem;
     public int alertTimer;
     public float delayBeforeShowArtifactTimer;
-    public Item geodeTreasure = new StardewValley.Object();
-    public Item geodeTreasureOverride = new StardewValley.Object();
+    public Item geodeTreasure;
+    public Item geodeTreasureOverride;
     public bool waitingForServerResponse;
     private TemporaryAnimatedSpriteList fluffSprites = new();
+    public static Farmer farmer;
+    public bool isUsingTool = false;
 
     public PlayerGeodeMenu()
         : base(null, okButton: true, trashCan: true, 12, 132)
@@ -35,10 +40,14 @@ public class PlayerGeodeMenu : MenuWithInventory
             myID = 998,
             downNeighborID = 0
         };
-        playerSprite = new AnimatedSprite
-        {
-            CurrentFrame = 6
-        };
+        farmer = Game1.player.CreateFakeEventFarmer();
+        farmer.faceDirection(3);
+        Tool pickaxe = ItemRegistry.Create<Tool>("Pickaxe", 1);
+        farmer.CurrentTool = pickaxe;
+        playerSprite = new AnimatedSprite();
+        playerSprite.SetOwner(farmer);
+        playerSprite.faceDirection(3);
+        playerSprite.CurrentFrame = 6;
         List<ClickableComponent> list = inventory.inventory;
         if (list != null && list.Count >= 12)
         {
@@ -93,28 +102,25 @@ public class PlayerGeodeMenu : MenuWithInventory
         return true;
     }
 
+
     public virtual void StartGeodeCrack()
     {
         geodeSpot.item = base.heldItem.getOne();
-        base.heldItem = base.heldItem.ConsumeStack(1);
-        geodeAnimationTimer = 600;
+        base.heldItem = base.heldItem.ConsumeStack(0);
+        geodeAnimationTimer = 401;
         Game1.playSound("stoneStep");
-        playerSprite.SetOwner(Game1.player);
-        playerSprite.setCurrentAnimation(new List<FarmerSprite.AnimationFrame>
+        playerSprite.SetOwner(farmer);
+        List<AnimationFrame> frames = new()
         {
-            new(6, 40),
-            new(30, 40),
-            new(31, 40),
-            new(32, 40),
-            new(33, 40),
-            new(34, 40),
-            new(35, 40),
-            new(6, 40),
-        });
+            new AnimationFrame(48, 80, secondaryArm: false, flip: true),
+            new AnimationFrame(49, 80, secondaryArm: false, flip: true , behaviorAtEndOfFrame: false),
+            new AnimationFrame(50, 80, secondaryArm: false, flip: true,behaviorAtEndOfFrame: false),
+            new AnimationFrame(51, 80, secondaryArm: false, flip: true),
+            new AnimationFrame(52, 80, secondaryArm: false, flip: true, behaviorAtEndOfFrame: false)
+        };
+        playerSprite.setCurrentAnimation(frames);
         playerSprite.loop = false;
-
     }
-
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
         if (waitingForServerResponse)
@@ -221,11 +227,15 @@ public class PlayerGeodeMenu : MenuWithInventory
             delayBeforeShowArtifactTimer = 0f;
             return;
         }
-
         int currentFrame = playerSprite.CurrentFrame;
         playerSprite.animateOnce(time);
 
-        if (playerSprite.currentFrame == 33 && currentFrame != 33)
+        if (playerSprite.CurrentFrame != 52)
+        {
+
+        }
+
+        if (playerSprite.currentFrame == 50 && currentFrame != 50)
         {
             if (geodeSpot.item?.QualifiedItemId == "(O)275" || geodeSpot.item?.QualifiedItemId == "(O)MysteryBox" || geodeSpot.item?.QualifiedItemId == "(O)GoldenMysteryBox")
             {
@@ -478,6 +488,7 @@ public class PlayerGeodeMenu : MenuWithInventory
         }
 
         base.draw(b);
+
         b.Draw(Game1.mouseCursors, new Vector2(geodeSpot.bounds.X, geodeSpot.bounds.Y), new Rectangle(0, 512, 140, 78), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.87f);
         if (geodeSpot.item != null)
         {
@@ -513,10 +524,9 @@ public class PlayerGeodeMenu : MenuWithInventory
 
             sparkle?.draw(b, localPosition: true);
         }
-
-        Game1.player.FarmerRenderer.draw(
+        farmer.FarmerRenderer.draw(
             b,
-            Game1.player,
+            farmer,
             playerSprite.CurrentFrame,
             new Vector2(geodeSpot.bounds.X + 430, geodeSpot.bounds.Y + 128),
             1f,
@@ -526,7 +536,6 @@ public class PlayerGeodeMenu : MenuWithInventory
         {
             IClickableMenu.drawHoverText(b, hoverText, Game1.smallFont);
         }
-
         base.heldItem?.drawInMenu(b, new Vector2(Game1.getOldMouseX() + 8, Game1.getOldMouseY() + 8), 1f);
         if (!Game1.options.hardwareCursor)
         {

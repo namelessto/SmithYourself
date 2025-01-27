@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Force.DeepCloner;
+using Microsoft.Xna.Framework.Graphics;
 using SmithYourself.mod_menu;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -24,6 +25,10 @@ namespace SmithYourself
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
+            // GeodeMenu
+            // Character
+            //CharacterCustomization
+            // StrengthGame
         }
 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -64,6 +69,17 @@ namespace SmithYourself
             bool canUpgradeTrinket = false;
             if (!Context.IsWorldReady)
                 return;
+            if (e.Button == SButton.K)
+            {
+                Game1.activeClickableMenu = new CharacterCustomization(CharacterCustomization.Source.Wizard);
+            }
+            if (e.Button == SButton.L)
+            {
+                monitor.Log($"tool name {Game1.player.CurrentTool.DisplayName}", LogLevel.Debug);
+                Game1.player.animateOnce(184);
+                monitor.Log($"tool index {Game1.player.CurrentTool.ParentSheetIndex}", LogLevel.Debug);
+                monitor.Log($"player facing direction: {Game1.player.facingDirection}", LogLevel.Info);
+            }
             if (minigameBarBackground != null && UtilsClass != null)
             {
                 if (
@@ -75,12 +91,12 @@ namespace SmithYourself
                     Item currentHeldItem = Game1.player.CurrentItem;
                     if (currentHeldItem != null)
                     {
-                        canUpgrade = UtilsClass.CanUpgradeTool(currentHeldItem);
-                        if (!canUpgrade)
+                        itemIsGeode = UtilsClass.CanBreakGeode(currentHeldItem);
+                        if (!itemIsGeode)
                         {
-                            itemIsGeode = UtilsClass.CanBreakGeode(currentHeldItem);
+                            canUpgrade = UtilsClass.CanUpgradeTool(currentHeldItem);
                         }
-                        if(!canUpgrade && !itemIsGeode)
+                        if (!canUpgrade && !itemIsGeode)
                         {
                             canUpgradeTrinket = UtilsClass.CanImproveTrinket(currentHeldItem);
                         }

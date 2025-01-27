@@ -37,7 +37,7 @@ namespace SmithYourself
         {
             string message;
             bool itemIsGeode = false;
-            if (config.ToolID[ToolType.Geode].Contains(item.ItemId))
+            if (config.ToolID[ToolType.Geode].Contains(item.ItemId) || Utility.IsGeode(item))
             {
                 itemIsGeode = true;
             }
@@ -48,15 +48,22 @@ namespace SmithYourself
 
             if (itemIsGeode && config.GeodeAllowances[ToolType.Geode]["all"])
             {
-                if (config.GeodeAllowances[ToolType.Geode][item.ItemId])
+                try
+                {
+                    if (config.GeodeAllowances[ToolType.Geode][item.ItemId])
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        message = helper.Translation.Get("geode.disabled");
+                        ShowMessage(message, HUDMessage.error_type);
+                        return false;
+                    }
+                }
+                catch
                 {
                     return true;
-                }
-                else
-                {
-                    message = helper.Translation.Get("geode.disabled");
-                    ShowMessage(message, HUDMessage.error_type);
-                    return false;
                 }
             }
             else
@@ -135,7 +142,6 @@ namespace SmithYourself
                 return true;
             }
         }
-
         public bool CanUpgradeTool(Item currentItem)
         {
             string message;
@@ -250,8 +256,6 @@ namespace SmithYourself
 
             return true;
         }
-
-
         private bool IsUpgradeAllowed(ToolType toolClassType, int toolLevel)
         {
             string message;
@@ -292,13 +296,11 @@ namespace SmithYourself
 
             return true;
         }
-
         public void ShowMessage(string message, int type)
         {
             HUDMessage hudMessage = new HUDMessage(message, type);
             Game1.addHUDMessage(hudMessage);
         }
-
         public bool PlayerHasItem(string itemId, int requiredAmount)
         {
             if (requiredAmount <= 0) return true;
@@ -309,7 +311,6 @@ namespace SmithYourself
 
             return totalAmount >= requiredAmount;
         }
-
         public Item UpgradeTool(Item currentItem, UpgradeResult result)
         {
             Tool currentTool;
@@ -575,7 +576,7 @@ namespace SmithYourself
             }
             else
             {
-                return false; 
+                return false;
             }
         }
 
