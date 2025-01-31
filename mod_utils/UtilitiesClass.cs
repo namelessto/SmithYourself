@@ -36,15 +36,13 @@ namespace SmithYourself
         public bool CanBreakGeode(Item item)
         {
             string message;
-            bool itemIsGeode = false;
-            if (config.ToolID[ToolType.Geode].Contains(item.ItemId) || Utility.IsGeode(item))
+            bool itemIsGeode = Utility.IsGeode(item);
+
+            if (!itemIsGeode)
             {
-                itemIsGeode = true;
+                return false;
             }
-            else
-            {
-                return itemIsGeode;
-            }
+
 
             if (itemIsGeode && config.GeodeAllowances[ToolType.Geode]["all"])
             {

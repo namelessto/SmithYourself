@@ -1,9 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SmithYourself;
-using StardewModdingAPI;
 using StardewValley.Extensions;
-using StardewValley.Tools;
 using static StardewValley.FarmerSprite;
 
 namespace StardewValley.Menus;
@@ -25,15 +23,16 @@ public class PlayerGeodeMenu : MenuWithInventory
     private TemporaryAnimatedSpriteList fluffSprites = new();
     public static Farmer farmer;
     public bool isUsingTool = false;
+    public string description;
 
-    public PlayerGeodeMenu()
+    public PlayerGeodeMenu(string menuDescription)
         : base(null, okButton: true, trashCan: true, 12, 132)
     {
         if (yPositionOnScreen == IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder)
         {
             movePosition(0, -IClickableMenu.spaceToClearTopBorder);
         }
-
+        description = menuDescription;
         inventory.highlightMethod = HighlightGeodes;
         geodeSpot = new ClickableComponent(new Rectangle(xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + IClickableMenu.borderWidth / 2, yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + 4, 560, 308), "")
         {
@@ -42,8 +41,8 @@ public class PlayerGeodeMenu : MenuWithInventory
         };
         farmer = Game1.player.CreateFakeEventFarmer();
         farmer.faceDirection(3);
-        Tool pickaxe = ItemRegistry.Create<Tool>("Pickaxe", 1);
-        farmer.CurrentTool = pickaxe;
+        // Tool pickaxe = ItemRegistry.Create<Tool>("Pickaxe", 1);
+        // farmer.CurrentTool = pickaxe;
         playerSprite = new AnimatedSprite();
         playerSprite.SetOwner(farmer);
         playerSprite.faceDirection(3);
@@ -96,31 +95,38 @@ public class PlayerGeodeMenu : MenuWithInventory
     {
         if (base.heldItem == null)
         {
-            return Utility.IsGeode(i) && ModEntry.Config.GeodeAllowances[ToolType.Geode][i.ItemId];
+            try
+            {
+                return Utility.IsGeode(i) && ModEntry.Config.GeodeAllowances[ToolType.Geode][i.ItemId];
+            }
+            catch
+            {
+                return Utility.IsGeode(i);
+            }
         }
 
         return true;
     }
 
-
     public virtual void StartGeodeCrack()
     {
         geodeSpot.item = base.heldItem.getOne();
-        base.heldItem = base.heldItem.ConsumeStack(0);
-        geodeAnimationTimer = 401;
+        base.heldItem = base.heldItem.ConsumeStack(1);
+        geodeAnimationTimer = 500;
         Game1.playSound("stoneStep");
         playerSprite.SetOwner(farmer);
         List<AnimationFrame> frames = new()
         {
-            new AnimationFrame(48, 80, secondaryArm: false, flip: true),
-            new AnimationFrame(49, 80, secondaryArm: false, flip: true , behaviorAtEndOfFrame: false),
-            new AnimationFrame(50, 80, secondaryArm: false, flip: true,behaviorAtEndOfFrame: false),
-            new AnimationFrame(51, 80, secondaryArm: false, flip: true),
-            new AnimationFrame(52, 80, secondaryArm: false, flip: true, behaviorAtEndOfFrame: false)
+            new AnimationFrame(48, 50, secondaryArm: false, flip: true),
+            new AnimationFrame(49, 50, secondaryArm: false, flip: true , behaviorAtEndOfFrame: false),
+            new AnimationFrame(50, 50, secondaryArm: false, flip: true,behaviorAtEndOfFrame: false),
+            new AnimationFrame(51, 50, secondaryArm: false, flip: true),
+            new AnimationFrame(52, 50, secondaryArm: false, flip: true, behaviorAtEndOfFrame: false)
         };
         playerSprite.setCurrentAnimation(frames);
         playerSprite.loop = false;
     }
+    
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
         if (waitingForServerResponse)
@@ -182,7 +188,8 @@ public class PlayerGeodeMenu : MenuWithInventory
         base.performHoverAction(x, y);
         if (descriptionText.Equals(""))
         {
-            descriptionText = Game1.content.LoadString("Strings\\UI:GeodeMenu_Description");
+
+            descriptionText = description;
         }
     }
 
@@ -209,7 +216,7 @@ public class PlayerGeodeMenu : MenuWithInventory
             return;
         }
 
-        Game1.MusicDuckTimer = 1500f;
+        Game1.MusicDuckTimer = 0;
         geodeAnimationTimer -= time.ElapsedGameTime.Milliseconds;
         if (geodeAnimationTimer <= 0)
         {
@@ -229,11 +236,6 @@ public class PlayerGeodeMenu : MenuWithInventory
         }
         int currentFrame = playerSprite.CurrentFrame;
         playerSprite.animateOnce(time);
-
-        if (playerSprite.CurrentFrame != 52)
-        {
-
-        }
 
         if (playerSprite.currentFrame == 50 && currentFrame != 50)
         {
@@ -283,7 +285,7 @@ public class PlayerGeodeMenu : MenuWithInventory
                                 animationLength = 6,
                                 position = new Vector2(geodeSpot.bounds.X + 380 - 32, geodeSpot.bounds.Y + 192 - 32),
                                 holdLastFrame = true,
-                                interval = 100f,
+                                interval = 50f,
                                 id = 777,
                                 scale = 4f
                             };
@@ -308,7 +310,7 @@ public class PlayerGeodeMenu : MenuWithInventory
                                     motion = new Vector2((float)Game1.random.Next(-30, 31) / 10f, Game1.random.Next(-7, -4)),
                                     acceleration = new Vector2(0f, 0.25f),
                                     totalNumberOfLoops = 1,
-                                    interval = 1000f,
+                                    interval = 30f,
                                     alphaFade = 0.015f,
                                     animationLength = 1,
                                     layerDepth = 1f,
@@ -317,7 +319,7 @@ public class PlayerGeodeMenu : MenuWithInventory
                                     delayBeforeAnimationStart = j * 10,
                                     position = new Vector2(geodeSpot.bounds.X + 392 - 32 + Game1.random.Next(21), geodeSpot.bounds.Y + 192 - 16)
                                 });
-                                delayBeforeShowArtifactTimer = 500f;
+                                delayBeforeShowArtifactTimer = 10f;
                             }
 
                             break;
@@ -333,7 +335,7 @@ public class PlayerGeodeMenu : MenuWithInventory
                                 animationLength = 8,
                                 position = new Vector2(geodeSpot.bounds.X + 380 - 48, geodeSpot.bounds.Y + 192 - 48),
                                 holdLastFrame = true,
-                                interval = 100f,
+                                interval = 30f,
                                 id = 777,
                                 scale = 4f
                             };
@@ -359,7 +361,7 @@ public class PlayerGeodeMenu : MenuWithInventory
                                     motion = new Vector2((float)Game1.random.Next(-30, 31) / 10f, Game1.random.Next(-7, -4)),
                                     acceleration = new Vector2(0f, 0.25f),
                                     totalNumberOfLoops = 1,
-                                    interval = 1000f,
+                                    interval = 30f,
                                     alphaFade = 0.015f,
                                     animationLength = 1,
                                     layerDepth = 1f,
@@ -368,7 +370,7 @@ public class PlayerGeodeMenu : MenuWithInventory
                                     delayBeforeAnimationStart = i * 10,
                                     position = new Vector2(geodeSpot.bounds.X + 392 - 48 + Game1.random.Next(32), geodeSpot.bounds.Y + 192 - 24)
                                 });
-                                delayBeforeShowArtifactTimer = 500f;
+                                delayBeforeShowArtifactTimer = 10f;
                             }
 
                             break;
@@ -404,7 +406,7 @@ public class PlayerGeodeMenu : MenuWithInventory
                     fluffSprites.Reverse();
                     geodeDestructionAnimation = new TemporaryAnimatedSprite
                     {
-                        interval = 100f,
+                        interval = 60f,
                         animationLength = 6,
                         alpha = 0.001f,
                         id = 777
@@ -425,7 +427,16 @@ public class PlayerGeodeMenu : MenuWithInventory
                     {
                         if (geodeSpot.item != null)
                         {
-                            sparkle = new TemporaryAnimatedSprite("TileSheets\\animations", new Rectangle(0, 640, 64, 64), 100f, 8, 0, new Vector2(geodeSpot.bounds.X + ((geodeSpot.item.itemId.Value == "MysteryBox") ? 94 : 98) * 4 - 32, geodeSpot.bounds.Y + 192 + yPositionOfGem - 32), flicker: false, flipped: false);
+                            sparkle = new TemporaryAnimatedSprite(
+                                "TileSheets\\animations",
+                                new Rectangle(0, 640, 64, 64),
+                                10f,
+                                8,
+                                0,
+                                new Vector2(geodeSpot.bounds.X + ((geodeSpot.item.itemId.Value == "MysteryBox") ? 94 : 98) * 4 - 32,
+                                geodeSpot.bounds.Y + 192 + yPositionOfGem - 32),
+                                flicker: false, flipped: false
+                            );
                         }
 
                         Game1.playSound("discoverMineral");
@@ -524,6 +535,7 @@ public class PlayerGeodeMenu : MenuWithInventory
 
             sparkle?.draw(b, localPosition: true);
         }
+
         farmer.FarmerRenderer.draw(
             b,
             farmer,
@@ -532,6 +544,7 @@ public class PlayerGeodeMenu : MenuWithInventory
             1f,
             flip: true
         );
+
         if (!hoverText.Equals(""))
         {
             IClickableMenu.drawHoverText(b, hoverText, Game1.smallFont);

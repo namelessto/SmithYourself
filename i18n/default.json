@@ -14,8 +14,11 @@
   "geode.frozen-geode": "Frozen Geode",
   "geode.magma-geode": "Magma Geode",
   "geode.omni-geode": "Omni Geode",
+  "geode.trove": "Treasure Trove",
+  "geode.coconut": "Golden Coconut",
   "geode.box": "Mystery Box",
   "geode.gold-box": "Golden Box",
+  "geode.menu-desc": "Opening geodes... How are can it be?\n\nI can do it myself!",
   "geode.disabled": "I can’t break this geode.",
 
   "trinket.trinket": "Trinket",

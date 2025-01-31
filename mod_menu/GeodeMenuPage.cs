@@ -50,6 +50,20 @@ namespace SmithYourself
 
             configMenu.AddBoolOption(
                 mod: manifest,
+                name: () => mainText + helper.Translation.Get("geode.trove"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["275"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["275"] = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => mainText + helper.Translation.Get("geode.coconut"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["791"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["791"] = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
                 name: () => mainText + helper.Translation.Get("geode.box"),
                 getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["MysteryBox"],
                 setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["MysteryBox"] = value
