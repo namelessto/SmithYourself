@@ -1,10 +1,10 @@
 {
-  "Name": "Smith Yourself",
-  "Author": "NamelessTo",
-  "Version": "1.9.3",
-  "Description": "Smith your tool yourself!",
-  "UniqueID": "NamelessTo.SmithYourself",
-  "EntryDll": "SmithYourself.dll",
-  "MinimumApiVersion": "4.0.7",
-  "UpdateKeys": ["Nexus:28301"]
+    "Name": "Smith Yourself",
+    "Author": "NamelessTo",
+    "Version": "1.9.8",
+    "Description": "Smith your tool yourself!",
+    "UniqueID": "NamelessTo.SmithYourself",
+    "EntryDll": "SmithYourself.dll",
+    "MinimumApiVersion": "4.2.1",
+    "UpdateKeys": [ "Nexus:28301" ]
 }

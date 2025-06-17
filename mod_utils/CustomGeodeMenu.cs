@@ -1,12 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SmithYourself;
+using StardewValley;
 using StardewValley.Extensions;
+using StardewValley.Menus;
 using static StardewValley.FarmerSprite;
+using Object = StardewValley.Object;
 
-namespace StardewValley.Menus;
+namespace SmithYourself;
 
-public class PlayerGeodeMenu : MenuWithInventory
+public class GeodeMenu : MenuWithInventory
 {
     public const int region_geodeSpot = 998;
     public ClickableComponent geodeSpot;
@@ -25,7 +28,7 @@ public class PlayerGeodeMenu : MenuWithInventory
     public bool isUsingTool = false;
     public string description;
 
-    public PlayerGeodeMenu(string menuDescription)
+    public GeodeMenu(string menuDescription)
         : base(null, okButton: true, trashCan: true, 12, 132)
     {
         if (yPositionOnScreen == IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder)
@@ -41,8 +44,6 @@ public class PlayerGeodeMenu : MenuWithInventory
         };
         farmer = Game1.player.CreateFakeEventFarmer();
         farmer.faceDirection(3);
-        // Tool pickaxe = ItemRegistry.Create<Tool>("Pickaxe", 1);
-        // farmer.CurrentTool = pickaxe;
         playerSprite = new AnimatedSprite();
         playerSprite.SetOwner(farmer);
         playerSprite.faceDirection(3);
@@ -73,6 +74,7 @@ public class PlayerGeodeMenu : MenuWithInventory
             populateClickableComponentList();
             snapToDefaultClickableComponent();
         }
+        ModEntry.isMinigameOpen = true;
     }
 
     public override void snapToDefaultClickableComponent()
@@ -85,6 +87,7 @@ public class PlayerGeodeMenu : MenuWithInventory
     {
         if (base.readyToClose() && geodeAnimationTimer <= 0 && base.heldItem == null)
         {
+            ModEntry.isMinigameOpen = false;
             return !waitingForServerResponse;
         }
 
@@ -126,7 +129,7 @@ public class PlayerGeodeMenu : MenuWithInventory
         playerSprite.setCurrentAnimation(frames);
         playerSprite.loop = false;
     }
-    
+
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
         if (waitingForServerResponse)
@@ -198,6 +201,7 @@ public class PlayerGeodeMenu : MenuWithInventory
         base.emergencyShutDown();
         if (base.heldItem != null)
         {
+            ModEntry.isMinigameOpen = false;
             Game1.player.addItemToInventoryBool(base.heldItem);
         }
     }

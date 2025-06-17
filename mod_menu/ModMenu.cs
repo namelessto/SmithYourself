@@ -82,6 +82,37 @@ namespace SmithYourself.mod_menu
                 interval: 0.01f
             );
 
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.minimum-tools-upgrade-cost"),
+                tooltip: () => helper.Translation.Get("menu.minimum-tools-upgrade-cost-tooltip"),
+                getValue: () => ModEntry.Config.MinimumToolsUpgradeCost,
+                setValue: value => ModEntry.Config.MinimumToolsUpgradeCost = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.free-tools-upgrade"),
+                getValue: () => ModEntry.Config.FreeToolsUpgrade,
+                setValue: value => ModEntry.Config.FreeToolsUpgrade = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.minimum-trinkets-upgrade-cost"),
+                tooltip: () => helper.Translation.Get("menu.minimum-trinkets-upgrade-cost-tooltip"),
+                getValue: () => ModEntry.Config.MinimumTrinketsUpgradeCost,
+                setValue: value => ModEntry.Config.MinimumTrinketsUpgradeCost = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.free-trinkets-upgrade"),
+                getValue: () => ModEntry.Config.FreeTrinketsUpgrade,
+                setValue: value => ModEntry.Config.FreeTrinketsUpgrade = value
+            );
+
+
             configMenu.AddSectionTitle(
                 mod: manifest,
                 text: () => helper.Translation.Get("menu.material-title")

@@ -29,6 +29,7 @@ namespace SmithYourself
             isIncreasing = true;
             barBackground = barBackgroundImage;
             maxRepeatAmount = UtilsClass.MaxRepeatAmount();
+            ModEntry.isMinigameOpen = true;
         }
 
         public void GetObjectPosition(Vector2 objectTilePosition, Vector2 playerWorldPosition)

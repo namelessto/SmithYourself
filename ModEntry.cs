@@ -1,5 +1,4 @@
-﻿using Force.DeepCloner;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using SmithYourself.mod_menu;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -11,17 +10,18 @@ namespace SmithYourself
 {
     internal sealed class ModEntry : Mod
     {
-        public static ModConfig Config = new();
-        public static IMonitor? monitor;
-        private UtilitiesClass? UtilsClass;
-        private Texture2D? minigameBarBackground;
-        public static bool isMinigameOpen = false;
+        public static ModConfig Config = new ModConfig();
+        public static IMonitor MonitorInstance = null!;
+        private UtilitiesClass utilities = null!;
+        private Texture2D minigameBarBackground = null!;
+        public static bool isMinigameOpen;
 
         public override void Entry(IModHelper helper)
         {
-            Config = Helper.ReadConfig<ModConfig>();
-            monitor = Monitor;
-            UtilsClass = new UtilitiesClass(helper, Monitor, Config);
+            Config = helper.ReadConfig<ModConfig>() ?? new ModConfig();
+            MonitorInstance = Monitor;
+            utilities = new UtilitiesClass(helper, MonitorInstance, Config);
+
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
@@ -29,9 +29,10 @@ namespace SmithYourself
 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
         {
-            if (Game1.player.hasOrWillReceiveMail("guildQuest") && !Game1.player.hasOrWillReceiveMail("NamelessTo.SmithYourselfCP.ReceiveAnvil"))
+            var player = Game1.player;
+            if (!player.hasOrWillReceiveMail("NamelessTo.SmithYourselfCP.ReceiveAnvil") && player.hasOrWillReceiveMail("guildQuest"))
             {
-                Game1.player.mailForTomorrow.Add("NamelessTo.SmithYourselfCP.ReceiveAnvil");
+                player.mailForTomorrow.Add("NamelessTo.SmithYourselfCP.ReceiveAnvil");
             }
         }
 
@@ -39,85 +40,90 @@ namespace SmithYourself
         {
             if (!Helper.ModRegistry.IsLoaded("NamelessTo.SmithYourselfCP"))
             {
-                Monitor.Log("CP component missing.", LogLevel.Error);
+                MonitorInstance.Log("CP component missing.", LogLevel.Error);
+                return;
             }
-            else
+
+            // Load assets
+            try
             {
                 minigameBarBackground = Helper.ModContent.Load<Texture2D>("assets/MinigameBar.png");
             }
+            catch (Exception ex)
+            {
+                MonitorInstance.Log($"Failed to load minigame bar texture: {ex.Message}", LogLevel.Error);
+            }
+
+            // Register config menu
             var configMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
-            if (configMenu is null)
-                return;
-
-            configMenu.Register(
-                mod: ModManifest,
-                reset: () => Config = new ModConfig(),
-                save: () => Helper.WriteConfig(Config)
-            );
-
-            ModMenu.BuildMenu(Helper, ModManifest, configMenu);
+            if (configMenu != null)
+            {
+                configMenu.Register(
+                    mod: ModManifest,
+                    reset: () => Config = new ModConfig(),
+                    save: () => Helper.WriteConfig(Config)
+                );
+                ModMenu.BuildMenu(Helper, ModManifest, configMenu);
+            }
         }
 
         private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
         {
-            bool canUpgrade = false;
-            bool itemIsGeode = false;
-            bool canUpgradeTrinket = false;
-
-            if (!Context.IsWorldReady)
+            if (!Context.IsWorldReady || utilities == null)
                 return;
-                
-            if (minigameBarBackground != null && UtilsClass != null)
+
+            if (!e.Button.IsActionButton())
+                return;
+
+            var cursorObject = utilities.GetObjectAtCursor() as SObject;
+            if (cursorObject == null || cursorObject.QualifiedItemId != "(BC)NamelessTo.SmithYourselfCP.SmithAnvil")
+                return;
+
+            var currentItem = Game1.player.CurrentItem;
+            if (currentItem == null)
             {
-                if (
-                    e.Button.IsActionButton() &&
-                    UtilsClass.GetObjectAtCursor() is SObject cursorObject &&
-                    cursorObject.QualifiedItemId == "(BC)NamelessTo.SmithYourselfCP.SmithAnvil"
-                )
-                {
-                    Item currentHeldItem = Game1.player.CurrentItem;
-                    if (currentHeldItem != null)
-                    {
-                        itemIsGeode = UtilsClass.CanBreakGeode(currentHeldItem);
-                        if (!itemIsGeode)
-                        {
-                            canUpgrade = UtilsClass.CanUpgradeTool(currentHeldItem);
-                        }
-                        if (!canUpgrade && !itemIsGeode)
-                        {
-                            canUpgradeTrinket = UtilsClass.CanImproveTrinket(currentHeldItem);
-                        }
-                        if (isMinigameOpen)
-                        {
-                            return;
-                        }
-                        if (itemIsGeode)
-                        {
-                            string description = Helper.Translation.Get("geode.menu-desc");
-                            Game1.activeClickableMenu = new PlayerGeodeMenu(description);
-                        }
-                        else if (!Config.SkipMinigame && (canUpgrade || canUpgradeTrinket))
-                        {
-                            StrengthMinigame minigame = new(UtilsClass, minigameBarBackground);
-                            minigame.GetObjectPosition(cursorObject.TileLocation, Game1.player.Position);
-                            Game1.activeClickableMenu = minigame;
-                            isMinigameOpen = true;
-                        }
-                        else if (Config.SkipMinigame && (canUpgrade || canUpgradeTrinket))
-                        {
-                            UtilsClass.UpgradeTool(currentHeldItem, UpgradeResult.Normal);
-                        }
-                    }
-                    else
-                    {
-                        string message = Helper.Translation.Get("tool.empty");
-                        UtilsClass.ShowMessage(message, 2);
-                    }
-                }
+                var message = Helper.Translation.Get("tool.empty");
+                utilities.ShowMessage(message, 2);
+                return;
+            }
+
+            if (isMinigameOpen)
+            {
+                Monitor.Log("minigame is open", LogLevel.Info);
+                return;
+            }
+
+            bool itemIsGeode = utilities.CanBreakGeode(currentItem);
+            bool canUpgradeTrinket = !itemIsGeode && utilities.CanImproveTrinket(currentItem);
+            bool canUpgrade = !itemIsGeode && !canUpgradeTrinket && utilities.CanUpgradeTool(currentItem);
+
+            if (itemIsGeode)
+            {
+                var description = Helper.Translation.Get("geode.menu-desc");
+                Game1.activeClickableMenu = new GeodeMenu(description);
+
+                isMinigameOpen = false;
+                return;
+            }
+
+            if (!canUpgrade && !canUpgradeTrinket)
+                return;
+
+            if (Config.SkipMinigame)
+            {
+                utilities.UpgradeTool(currentItem, UpgradeResult.Normal);
+            }
+            else if (minigameBarBackground != null)
+            {
+                var minigame = new StrengthMinigame(utilities, minigameBarBackground);
+                minigame.GetObjectPosition(cursorObject.TileLocation, Game1.player.Position);
+                Game1.activeClickableMenu = minigame;
+                isMinigameOpen = false;
+                return;
             }
             else
             {
-                Monitor.Log("Minigame assets missing", LogLevel.Error);
+                MonitorInstance.Log("Minigame assets missing", LogLevel.Error);
             }
         }
     }

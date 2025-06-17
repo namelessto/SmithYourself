@@ -18,43 +18,112 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["all"] = value
             );
 
-            string mainText = helper.Translation.Get("menu.enable-upgrade") + " ";
+            Func<string> mainText = () => helper.Translation.Get("menu.enable-upgrade") + " ";
 
+            // Parrot Egg
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => mainText + helper.Translation.Get("trinket.parrot-egg"),
+                name: () => mainText() + helper.Translation.Get("trinket.parrot-egg"),
                 getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["ParrotEgg"],
                 setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["ParrotEgg"] = value
             );
+            configMenu.AddTextOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-id"),
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][0],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][0] = value
+            );
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-quantity"),
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][0],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][0] = value,
+                min: 0
+            );
 
+            //Fairy Box
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => mainText + helper.Translation.Get("trinket.fairy-box"),
+                name: () => mainText() + helper.Translation.Get("trinket.fairy-box"),
                 getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["FairyBox"],
                 setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["FairyBox"] = value
             );
+            configMenu.AddTextOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-id"),
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][1],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][1] = value
+            );
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-quantity"),
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][1],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][1] = value,
+                min: 0
+            );
 
+            //Iridium Spur
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => mainText + helper.Translation.Get("trinket.gold-spur"),
+                name: () => mainText() + helper.Translation.Get("trinket.gold-spur"),
                 getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["IridiumSpur"],
                 setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["IridiumSpur"] = value
             );
+            configMenu.AddTextOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-id"),
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][2],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][2] = value
+            );
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-quantity"),
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][2],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][2] = value,
+                min: 0
+            );
 
+            //Ice Rod
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => mainText + helper.Translation.Get("trinket.ice-rod"),
+                name: () => mainText() + helper.Translation.Get("trinket.ice-rod"),
                 getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["IceRod"],
                 setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["IceRod"] = value
             );
+            configMenu.AddTextOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-id"),
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][3],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][3] = value
+            );
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-quantity"),
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][3],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][3] = value,
+                min: 0
+            );
 
+            //Magic Quiver
             configMenu.AddBoolOption(
                 mod: manifest,
-                name: () => mainText + helper.Translation.Get("trinket.magic-quiver"),
+                name: () => mainText() + helper.Translation.Get("trinket.magic-quiver"),
                 getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["MagicQuiver"],
                 setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["MagicQuiver"] = value
             );
-
+            configMenu.AddTextOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-id"),
+                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][4],
+                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][4] = value
+            );
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.item-quantity"),
+                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][4],
+                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][4] = value,
+                min: 0
+            );
         }
     }
 }

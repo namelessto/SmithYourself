@@ -7,6 +7,10 @@ namespace SmithYourself
         public bool SkipMinigame { get; set; } = false;
         public bool SimpleMinigame { get; set; } = false;
         public bool SkipTrainingRod { get; set; } = false;
+        public bool FreeToolsUpgrade { get; set; } = false;
+        public bool FreeTrinketsUpgrade { get; set; } = false;
+        public bool MinimumToolsUpgradeCost { get; set; } = false;
+        public bool MinimumTrinketsUpgradeCost { get; set; } = false;
         public bool AllowFail { get; set; } = true;
         public float FailPoint { get; set; } = 0.35f;
         public float MinigameBarIncrement { get; set; } = 0.04f;
@@ -21,9 +25,8 @@ namespace SmithYourself
             { ToolType.Pan,         new Dictionary<int, string> { { 1, "335" }, { 2, "336" }, { 3, "337" } } },
             { ToolType.Rod,         new Dictionary<int, string> { { 0, "388" }, { 1, "338" }, { 2, "337" }, { 3, "337" } } },
             { ToolType.Scythe,      new Dictionary<int, string> { { 0, "336" }, { 1, "337" } } },
-            { ToolType.Bag,         new Dictionary<int, string> { { 12, "440" }, { 24, "428" } } },
-            { ToolType.Trinket,     new Dictionary<int, string> { { 0, "337" }, } },
-
+            { ToolType.Trinket,     new Dictionary<int, string> { { 0, "337" }, { 1, "337" }, { 2, "337" }, { 3, "337" }, { 4, "337" }, } },
+            { ToolType.Bag,         new Dictionary<int, string> { { 12, "771" }, { 24, "428" } } },
         };
 
         public Dictionary<ToolType, Dictionary<int, int>> UpgradeAmounts { get; set; } = new Dictionary<ToolType, Dictionary<int, int>>
@@ -36,8 +39,8 @@ namespace SmithYourself
             { ToolType.Pan,         new Dictionary<int, int> { { 1, 5 }, { 2, 5 }, { 3, 5 } } },
             { ToolType.Rod,         new Dictionary<int, int> { { 0, 100 }, { 1, 10 }, { 2, 5 }, { 3, 40 } } },
             { ToolType.Scythe,      new Dictionary<int, int> { { 0, 25 }, { 1, 40 } } },
-            { ToolType.Bag,         new Dictionary<int, int> { { 12, 3 }, { 24, 3 } } },
-            { ToolType.Trinket,     new Dictionary<int, int> { { 0, 3 }, } },
+            { ToolType.Trinket,     new Dictionary<int, int> { { 0, 3 },{ 1, 3 },{ 2, 3 },{ 3, 3 },{ 4, 3 } } },
+            { ToolType.Bag,         new Dictionary<int, int> { { 12, 50 }, { 24, 3 } } },
 
         };
 
@@ -51,8 +54,8 @@ namespace SmithYourself
             { ToolType.Rod,         new Dictionary<int, int> { { 0, 2 }, { 1, 3 }, { 2, 4 }, { 3, 5 } } },
             { ToolType.Pan,         new Dictionary<int, int> { { 1, 3 }, { 2, 4 }, { 3, 5 } } },
             { ToolType.Scythe,      new Dictionary<int, int> { { 0, 3 }, { 1, 5 } } },
+            { ToolType.Trinket,     new Dictionary<int, int> { { 0, 4 },{ 1, 4 },{ 2, 4 },{ 3, 4 },{ 4, 4 } } },
             { ToolType.Bag,         new Dictionary<int, int> { { 12, 3 }, { 24, 5 } } },
-            { ToolType.Trinket,     new Dictionary<int, int> { { 0, 4 }, } },
         };
 
         public Dictionary<ToolType, Dictionary<int, bool>> UpgradeAllowances { get; set; } = new Dictionary<ToolType, Dictionary<int, bool>>
@@ -89,15 +92,15 @@ namespace SmithYourself
         public Dictionary<ToolType, List<string>> ToolID { get; set; } = new Dictionary<ToolType, List<string>>
         {
             { ToolType.Axe,         new List<string> { "Axe", "CopperAxe", "SteelAxe", "GoldAxe", "IridiumAxe"} },
-            { ToolType.Pickaxe,     new List<string> { "Pickaxe","CopperPickaxe","SteelPickaxe","GoldPickaxe","IridiumPickaxe"}  },
-            { ToolType.Hoe,         new List<string> { "Hoe","CopperHoe","SteelHoe","GoldHoe","IridiumHoe"}},
+            { ToolType.Pickaxe,     new List<string> { "Pickaxe","CopperPickaxe","SteelPickaxe","GoldPickaxe","IridiumPickaxe"} },
+            { ToolType.Hoe,         new List<string> { "Hoe","CopperHoe","SteelHoe","GoldHoe","IridiumHoe"} },
             { ToolType.Trash,       new List<string> { "TrashCan","CopperTrashCan","SteelTrashCan","GoldTrashCan","IridiumTrashCan"} },
-            { ToolType.WateringCan, new List<string> { "WateringCan","CopperWateringCan","SteelWateringCan","GoldWateringCan","IridiumWateringCan"}},
+            { ToolType.WateringCan, new List<string> { "WateringCan","CopperWateringCan","SteelWateringCan","GoldWateringCan","IridiumWateringCan"} },
             { ToolType.Rod,         new List<string> { "BambooPole", "TrainingRod", "FiberglassRod", "IridiumRod", "AdvancedIridiumRod"} },
             { ToolType.Pan,         new List<string> { "Pan", "SteelPan", "GoldPan", "IridiumPan"} },
             { ToolType.Scythe,      new List<string> { "(W)47", "(W)53", "(W)66"} },
             { ToolType.Geode,       new List<string> { "535", "536", "537", "749", "275", "791", "MysteryBox", "GoldenMysteryBox"} },
-            { ToolType.Trinket,     new List<string> { "BasiliskPaw", "FrogEgg", "MagicHairDye", "IceRod","IridiumSpur", "FairyBox","ParrotEgg","MagicQuiver"} },
+            { ToolType.Trinket,     new List<string> { "ParrotEgg", "FairyBox", "IridiumSpur", "IceRod", "MagicQuiver", "BasiliskPaw", "MagicHairDye", "FrogEgg"} },
             { ToolType.Bag,         new List<string> { "12", "24", "36"} },
         };
     }
