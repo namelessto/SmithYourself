@@ -407,7 +407,7 @@ namespace SmithYourself
         public int CalculateAttemptScore(float powerMeter)
         {
             int relevantSkillLevel = GetRelevantSkillLevel(toolUpgradeData.ToolClassType);
-            float successThreshold = 96 - relevantSkillLevel;
+            float successThreshold = 90 - relevantSkillLevel;
             int score;
 
             if (powerMeter * 100 >= successThreshold)
