@@ -6,14 +6,17 @@ namespace SmithYourself
     {
         public bool SkipMinigame { get; set; } = false;
         public bool SimpleMinigame { get; set; } = false;
-        public bool SkipTrainingRod { get; set; } = false;
+        public bool SkipTrainingRod { get; set; } = true;
         public bool FreeToolsUpgrade { get; set; } = false;
         public bool FreeTrinketsUpgrade { get; set; } = false;
         public bool MinimumToolsUpgradeCost { get; set; } = false;
         public bool MinimumTrinketsUpgradeCost { get; set; } = false;
+        public bool AllowHintMarker { get; set; } = true;
+        public bool AllowPopupText { get; set; } = true;
         public bool AllowFail { get; set; } = true;
         public float FailPoint { get; set; } = 0.35f;
-        public float MinigameBarIncrement { get; set; } = 0.04f;
+        public float MinigameBarSpeed { get; set; } = 0.15f;
+        public float MinigameCooldown { get; set; } = 0.6f;
 
         public Dictionary<ToolType, Dictionary<int, string>> UpgradeItemsId { get; set; } = new Dictionary<ToolType, Dictionary<int, string>>
         {
@@ -81,7 +84,8 @@ namespace SmithYourself
                 { "275", true },
                 { "791", true },
                 { "MysteryBox", true },
-                { "GoldenMysteryBox", true }}
+                { "GoldenMysteryBox", true },
+                { "custom", true }}
             },
         };
         public Dictionary<ToolType, Dictionary<string, bool>> TrinketAllowances { get; set; } = new Dictionary<ToolType, Dictionary<string, bool>>

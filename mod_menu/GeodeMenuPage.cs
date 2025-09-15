@@ -1,4 +1,5 @@
-﻿using StardewModdingAPI;
+﻿using SmithYourself.mod_menu;
+using StardewModdingAPI;
 
 namespace SmithYourself
 {
@@ -17,6 +18,8 @@ namespace SmithYourself
                 getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["all"],
                 setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["all"] = value
             );
+
+            ModMenu.AddSeparator(configMenu, manifest);
 
             Func<string> mainText = () => helper.Translation.Get("menu.enable-geode-open") + " ";
 
@@ -74,6 +77,13 @@ namespace SmithYourself
                 name: () => mainText() + helper.Translation.Get("geode.gold-box"),
                 getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["GoldenMysteryBox"],
                 setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["GoldenMysteryBox"] = value
+            );
+
+            configMenu.AddBoolOption(
+                mod: manifest,
+                name: () => mainText() + helper.Translation.Get("menu.enable-custom-geode"),
+                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["custom"],
+                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["custom"] = value
             );
         }
     }

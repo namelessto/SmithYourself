@@ -1,10 +1,9 @@
 ﻿using StardewModdingAPI;
 using StardewValley;
-using StardewValley.GameData.Tools;
 using StardewValley.Objects.Trinkets;
 using StardewValley.Tools;
-using System;
 using SObject = StardewValley.Object;
+using StardewValley.Menus;
 
 namespace SmithYourself
 {
@@ -44,13 +43,11 @@ namespace SmithYourself
                 return false;
             }
 
-
-            if (itemIsGeode && config.GeodeAllowances[ToolType.Geode]["all"])
+            if (config.GeodeAllowances[ToolType.Geode]["all"])
             {
                 try
                 {
-
-                    if (config.GeodeAllowances[ToolType.Geode].TryGetValue(item.ItemId, out bool allowed))
+                    if (config.GeodeAllowances[ToolType.Geode][item.ItemId] is bool allowed && allowed)
                         return allowed;
                     else
                     {
@@ -61,7 +58,11 @@ namespace SmithYourself
                 }
                 catch
                 {
-                    return true;
+                    if (config.GeodeAllowances[ToolType.Geode]["custom"])
+                    {
+                        return true;
+                    }
+                    return false;
                 }
             }
             else
@@ -136,7 +137,7 @@ namespace SmithYourself
                 return false;
             }
 
-            if (currentItem is Trinket)
+            if (currentItem is Trinket || Utility.IsGeode(currentItem))
             {
                 return false;
             }
@@ -209,7 +210,7 @@ namespace SmithYourself
                     toolUpgradeData.ToolLevel = Game1.player.trashCanLevel;
                     break;
                 case ToolType.Rod:
-                    toolUpgradeData.ToolLevel = (toolUpgradeData.ToolLevel == 0 && ModEntry.Config.SkipTrainingRod) ? toolUpgradeData.ToolLevel + 1 : toolUpgradeData.ToolLevel;
+                    toolUpgradeData.ToolLevel = (toolUpgradeData.ToolLevel == 0 && config.SkipTrainingRod) ? toolUpgradeData.ToolLevel + 1 : toolUpgradeData.ToolLevel;
                     break;
                 default:
                     break;
@@ -407,22 +408,32 @@ namespace SmithYourself
         public int CalculateAttemptScore(float powerMeter)
         {
             int relevantSkillLevel = GetRelevantSkillLevel(toolUpgradeData.ToolClassType);
-            float successThreshold = 90 - relevantSkillLevel;
+            float skillBonus = relevantSkillLevel * 0.5f; // Each skill level gives a 0.5% wider range
+            float power = powerMeter * 100;
+
+
             int score;
 
-            if (powerMeter * 100 >= successThreshold)
+            // Perfect: 99-100% (plus skill bonus)
+            if (power >= 99 - skillBonus && power <= 100)
+            {
+                score = (int)UpgradeResult.Perfect;
+            }
+            // Critical: 75-94% (plus skill bonus)
+            else if (power >= 75 - skillBonus && power < 99 - skillBonus)
             {
                 score = (int)UpgradeResult.Critical;
             }
-            else if (ModEntry.Config.AllowFail && powerMeter <= ModEntry.Config.FailPoint)
+            // Failed: Below 30% (if allowed)
+            else if (config.AllowFail && power <= config.FailPoint * 100)
             {
                 score = (int)UpgradeResult.Failed;
             }
+            // Normal: Everything else (30-74% plus skill bonus)
             else
             {
                 score = (int)UpgradeResult.Normal;
             }
-
             return score;
         }
 
@@ -646,7 +657,125 @@ namespace SmithYourself
                     break;
             }
         }
+
+        
+
+        private static string ResolveItemName(string id)
+        {
+            try
+            {
+                var item = ItemRegistry.Create(id, 1);
+                if (item is not null)
+                    return item.DisplayName ?? id;
+            }
+            catch { /* ignore bad ids */ }
+            return id;
+        }
+        public void ShowManual()
+        {
+            ModEntry.isManualOpen = true;
+            var tokens = new Dictionary<string, object>
+            {
+                // Axe
+                ["Axe_0_amount"] = config.UpgradeAmounts[ToolType.Axe][0],
+                ["Axe_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Axe][0]),
+                ["Axe_1_amount"] = config.UpgradeAmounts[ToolType.Axe][1],
+                ["Axe_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Axe][1]),
+                ["Axe_2_amount"] = config.UpgradeAmounts[ToolType.Axe][2],
+                ["Axe_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Axe][2]),
+                ["Axe_3_amount"] = config.UpgradeAmounts[ToolType.Axe][3],
+                ["Axe_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Axe][3]),
+
+                // Pickaxe
+                ["Pickaxe_0_amount"] = config.UpgradeAmounts[ToolType.Pickaxe][0],
+                ["Pickaxe_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pickaxe][0]),
+                ["Pickaxe_1_amount"] = config.UpgradeAmounts[ToolType.Pickaxe][1],
+                ["Pickaxe_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pickaxe][1]),
+                ["Pickaxe_2_amount"] = config.UpgradeAmounts[ToolType.Pickaxe][2],
+                ["Pickaxe_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pickaxe][2]),
+                ["Pickaxe_3_amount"] = config.UpgradeAmounts[ToolType.Pickaxe][3],
+                ["Pickaxe_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pickaxe][3]),
+
+                // Hoe
+                ["Hoe_0_amount"] = config.UpgradeAmounts[ToolType.Hoe][0],
+                ["Hoe_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Hoe][0]),
+                ["Hoe_1_amount"] = config.UpgradeAmounts[ToolType.Hoe][1],
+                ["Hoe_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Hoe][1]),
+                ["Hoe_2_amount"] = config.UpgradeAmounts[ToolType.Hoe][2],
+                ["Hoe_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Hoe][2]),
+                ["Hoe_3_amount"] = config.UpgradeAmounts[ToolType.Hoe][3],
+                ["Hoe_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Hoe][3]),
+
+                // Watering Can
+                ["WateringCan_0_amount"] = config.UpgradeAmounts[ToolType.WateringCan][0],
+                ["WateringCan_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.WateringCan][0]),
+                ["WateringCan_1_amount"] = config.UpgradeAmounts[ToolType.WateringCan][1],
+                ["WateringCan_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.WateringCan][1]),
+                ["WateringCan_2_amount"] = config.UpgradeAmounts[ToolType.WateringCan][2],
+                ["WateringCan_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.WateringCan][2]),
+                ["WateringCan_3_amount"] = config.UpgradeAmounts[ToolType.WateringCan][3],
+                ["WateringCan_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.WateringCan][3]),
+
+                // Trash Can
+                ["Trash_0_amount"] = config.UpgradeAmounts[ToolType.Trash][0],
+                ["Trash_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trash][0]),
+                ["Trash_1_amount"] = config.UpgradeAmounts[ToolType.Trash][1],
+                ["Trash_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trash][1]),
+                ["Trash_2_amount"] = config.UpgradeAmounts[ToolType.Trash][2],
+                ["Trash_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trash][2]),
+                ["Trash_3_amount"] = config.UpgradeAmounts[ToolType.Trash][3],
+                ["Trash_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trash][3]),
+
+                // Pan
+                ["Pan_1_amount"] = config.UpgradeAmounts[ToolType.Pan][1],
+                ["Pan_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pan][1]),
+                ["Pan_2_amount"] = config.UpgradeAmounts[ToolType.Pan][2],
+                ["Pan_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pan][2]),
+                ["Pan_3_amount"] = config.UpgradeAmounts[ToolType.Pan][3],
+                ["Pan_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pan][3]),
+
+                // Rod
+                ["Rod_0_amount"] = config.UpgradeAmounts[ToolType.Rod][0],
+                ["Rod_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Rod][0]),
+                ["Rod_1_amount"] = config.UpgradeAmounts[ToolType.Rod][1],
+                ["Rod_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Rod][1]),
+                ["Rod_2_amount"] = config.UpgradeAmounts[ToolType.Rod][2],
+                ["Rod_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Rod][2]),
+                ["Rod_3_amount"] = config.UpgradeAmounts[ToolType.Rod][3],
+                ["Rod_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Rod][3]),
+
+                // Scythe
+                ["Scythe_0_amount"] = config.UpgradeAmounts[ToolType.Scythe][0],
+                ["Scythe_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Scythe][0]),
+                ["Scythe_1_amount"] = config.UpgradeAmounts[ToolType.Scythe][1],
+                ["Scythe_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Scythe][1]),
+
+                // Bag
+                ["Bag_12_amount"] = config.UpgradeAmounts[ToolType.Bag][12],
+                ["Bag_12_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Bag][12]),
+                ["Bag_24_amount"] = config.UpgradeAmounts[ToolType.Bag][24],
+                ["Bag_24_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Bag][24]),
+
+                // Trinket
+                ["Trinket_0_amount"] = config.UpgradeAmounts[ToolType.Trinket][0],
+                ["Trinket_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trinket][0])
+            };
+
+            string body = config.SkipTrainingRod
+                ? helper.Translation.Get("anvil.page.body.no-training-rod", tokens)
+                : helper.Translation.Get("anvil.page.body", tokens);
+
+            Game1.activeClickableMenu = new LetterViewerMenu(
+                body,
+                helper.Translation.Get("anvil.page.title"),
+                fromCollection: false
+            );
+
+            Game1.player.Halt();
+            Game1.playSound("bigSelect");
+        }
     }
+
 
     internal class ToolUpgradeData
     {
@@ -657,6 +786,7 @@ namespace SmithYourself
     {
         Failed,
         Normal,
-        Critical
+        Critical,
+        Perfect
     }
 }

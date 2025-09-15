@@ -28,39 +28,39 @@ namespace SmithYourself.mod_menu
             TierFourItemQuantity = () => helper.Translation.Get("menu.tier-four") + " " + helper.Translation.Get("menu.item-quantity");
             configMenu.AddPageLink(mod: manifest,
                 pageId: "axe",
-                () => helper.Translation.Get("menu.axe-page")
+                () => helper.Translation.Get("menu.axe-page") + " >"
             );
             configMenu.AddPageLink(mod: manifest,
                 pageId: "pickaxe",
-                () => helper.Translation.Get("menu.pickaxe-page")
+                () => helper.Translation.Get("menu.pickaxe-page") + " >"
             );
             configMenu.AddPageLink(mod: manifest,
                 pageId: "hoe",
-                () => helper.Translation.Get("menu.hoe-page")
+                () => helper.Translation.Get("menu.hoe-page") + " >"
             );
             configMenu.AddPageLink(mod: manifest,
                 pageId: "trash",
-                () => helper.Translation.Get("menu.trash-page")
+                () => helper.Translation.Get("menu.trash-page") + " >"
             );
             configMenu.AddPageLink(mod: manifest,
                 pageId: "watering_can",
-                () => helper.Translation.Get("menu.water-can-page")
+                () => helper.Translation.Get("menu.water-can-page") + " >"
             );
             configMenu.AddPageLink(mod: manifest,
                 pageId: "rod",
-                () => helper.Translation.Get("menu.rod-page")
+                () => helper.Translation.Get("menu.rod-page") + " >"
             );
             configMenu.AddPageLink(mod: manifest,
                 pageId: "scythe",
-                () => helper.Translation.Get("menu.scythe-page")
+                () => helper.Translation.Get("menu.scythe-page") + " >"
             );
             configMenu.AddPageLink(mod: manifest,
                 pageId: "pan",
-                () => helper.Translation.Get("menu.pan-page")
+                () => helper.Translation.Get("menu.pan-page") + " >"
             );
             configMenu.AddPageLink(mod: manifest,
                 pageId: "bag",
-                () => helper.Translation.Get("menu.bag-page")
+                () => helper.Translation.Get("menu.bag-page") + " >"
             );
         }
 
@@ -79,7 +79,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Axe][-1] = value
             );
 
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -100,6 +100,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Axe][0] = value,
                 min: 0
             );
+            ModMenu.AddSeparator(configMenu, manifest);
 
             // Level 2
             configMenu.AddBoolOption(
@@ -121,7 +122,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Axe][1] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 3
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -142,7 +143,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Axe][2] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 4
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -178,7 +179,7 @@ namespace SmithYourself.mod_menu
                 getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Pickaxe][-1],
                 setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Pickaxe][-1] = value
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -199,7 +200,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][0] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -220,7 +221,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][1] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 3
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -241,7 +242,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pickaxe][2] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 4
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -276,7 +277,7 @@ namespace SmithYourself.mod_menu
                 getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Hoe][-1],
                 setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Hoe][-1] = value
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -297,7 +298,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][0] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -318,7 +319,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][1] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 3
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -339,7 +340,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Hoe][2] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 4
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -374,7 +375,7 @@ namespace SmithYourself.mod_menu
                 getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Trash][-1],
                 setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Trash][-1] = value
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -395,7 +396,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trash][0] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -416,7 +417,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trash][1] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 3
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -437,7 +438,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trash][2] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 4
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -472,7 +473,7 @@ namespace SmithYourself.mod_menu
                 getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.WateringCan][-1],
                 setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.WateringCan][-1] = value
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -493,7 +494,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][0] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -514,7 +515,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][1] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 3
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -535,7 +536,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.WateringCan][2] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 4
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -576,7 +577,7 @@ namespace SmithYourself.mod_menu
                 getValue: () => ModEntry.Config.SkipTrainingRod,
                 setValue: value => ModEntry.Config.SkipTrainingRod = value
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -597,7 +598,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Rod][0] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -618,7 +619,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Rod][1] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 3
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -639,7 +640,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Rod][2] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 4
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -674,7 +675,7 @@ namespace SmithYourself.mod_menu
                 getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Scythe][-1],
                 setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Scythe][-1] = value
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -695,7 +696,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Scythe][0] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -731,7 +732,7 @@ namespace SmithYourself.mod_menu
                 getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Pan][-1],
                 setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Pan][-1] = value
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -752,7 +753,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pan][1] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -773,7 +774,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Pan][2] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 3
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -809,7 +810,7 @@ namespace SmithYourself.mod_menu
                 getValue: () => ModEntry.Config.UpgradeAllowances[ToolType.Bag][-1],
                 setValue: value => ModEntry.Config.UpgradeAllowances[ToolType.Bag][-1] = value
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 1
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -830,7 +831,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Bag][12] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Level 2
             configMenu.AddBoolOption(
                 mod: manifest,

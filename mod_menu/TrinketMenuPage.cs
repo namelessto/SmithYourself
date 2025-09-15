@@ -19,7 +19,7 @@ namespace SmithYourself.mod_menu
             );
 
             Func<string> mainText = () => helper.Translation.Get("menu.enable-upgrade") + " ";
-
+            ModMenu.AddSeparator(configMenu, manifest);
             // Parrot Egg
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -40,7 +40,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][0] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             //Fairy Box
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -61,7 +61,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][1] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             //Iridium Spur
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -82,7 +82,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][2] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             //Ice Rod
             configMenu.AddBoolOption(
                 mod: manifest,
@@ -103,7 +103,7 @@ namespace SmithYourself.mod_menu
                 setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][3] = value,
                 min: 0
             );
-
+            ModMenu.AddSeparator(configMenu, manifest);
             //Magic Quiver
             configMenu.AddBoolOption(
                 mod: manifest,
