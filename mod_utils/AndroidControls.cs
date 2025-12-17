@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;              // Vector2, Rectangle, Point
+﻿using Microsoft.Xna.Framework;              // Vector2, Rectangle, Point
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;

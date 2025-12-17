@@ -1,6 +1,4 @@
-﻿using StardewValley;
-
-namespace SmithYourself
+﻿namespace SmithYourself
 {
     internal class ModConfig
     {
@@ -17,6 +15,7 @@ namespace SmithYourself
         public float FailPoint { get; set; } = 0.35f;
         public float MinigameBarSpeed { get; set; } = 0.15f;
         public float MinigameCooldown { get; set; } = 0.6f;
+        public int AmountGeodesToOpen { get; set; } = 1;
 
         public Dictionary<ToolType, Dictionary<int, string>> UpgradeItemsId { get; set; } = new Dictionary<ToolType, Dictionary<int, string>>
         {

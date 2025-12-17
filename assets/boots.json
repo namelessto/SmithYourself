@@ -1,0 +1,20 @@
+[
+    {
+        "Id": "OldBoots",
+        "Name": "Old Boots",
+        "Description": "These are some old boots.",
+        "Defense": 1,
+        "Immunity": 0,
+        "ColorIndex": 0,
+        "SpriteIndex": 0
+    },
+    {
+        "Id": "SteelTreads",
+        "Name": "Steel Treads",
+        "Description": "Heavy and loud.",
+        "Defense": 3,
+        "Immunity": 1,
+        "ColorIndex": 1,
+        "SpriteIndex": 1
+    }
+]

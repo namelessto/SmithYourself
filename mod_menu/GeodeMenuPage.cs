@@ -12,6 +12,15 @@ namespace SmithYourself
                 pageId: "geode",
                 () => helper.Translation.Get("menu.geode-page")
             );
+
+            configMenu.AddNumberOption(
+                mod: manifest,
+                name: () => helper.Translation.Get("menu.geode-amount-to-open"),
+                tooltip: () => helper.Translation.Get("menu.geode-amount-to-open-tooltip"),
+                getValue: () => ModEntry.Config.AmountGeodesToOpen,
+                setValue: value => ModEntry.Config.AmountGeodesToOpen = value,
+                interval: 1
+            );
             configMenu.AddBoolOption(
                 mod: manifest,
                 name: () => helper.Translation.Get("menu.enable-all-geode-open"),

@@ -1,14 +1,20 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewValley.GameData.BigCraftables;
-using StardewValley.GameData.Shops;
-using System;
-using System.Collections.Generic;
+
 
 namespace SmithYourself.mod_utils
 {
-    internal class Initialization
+    internal static class SmithingTextureKeys
+    {
+        public const string MinigameBar = "minigame_bar";
+        public const string AnvilUI = "anvil_ui";
+        public const string HammerUI = "hammer_ui";
+        public const string AutoButtons = "auto_buttons";
+        public const string SmashButtons = "smash_buttons";
+    }
+
+    internal sealed class Initialization
     {
         private readonly IModHelper helper;
         private readonly IMonitor monitor;
@@ -16,14 +22,16 @@ namespace SmithYourself.mod_utils
         private readonly ITranslationHelper i18n;
         private readonly IManifest manifest;
         private readonly UtilitiesClass utilities;
-        private const int GuildShopPrice = 2500;
-        private const int GuildShopStock = 1;
 
-        public Texture2D? MinigameBarTexture { get; private set; }
-        public Texture2D? AnvilTexture { get; private set; }
+        // Exposed for ModEntry/minigame usage
+        public Dictionary<string, Texture2D?> SmithingTextures { get; } = new();
 
-        private string BigCraftableId => $"{manifest.UniqueID}.SmithAnvil";
-        private string MailId => $"{manifest.UniqueID}.ReceiveAnvil";
+        private readonly AssetRouter assetRouter;
+        private readonly Editors.BootsEditor bootsEditor;
+        private readonly Editors.WeaponsEditor weaponsEditor;
+        private readonly Editors.ShopsEditor shopsEditor;
+        private readonly Editors.MailEditor mailEditor;
+        private readonly Editors.BigCraftablesEditor bigCraftablesEditor;
 
         public Initialization(IModHelper Helper, IMonitor Monitor, ModConfig Config, ITranslationHelper I18n, IManifest Manifest)
         {
@@ -33,94 +41,55 @@ namespace SmithYourself.mod_utils
             i18n = I18n;
             manifest = Manifest;
             utilities = new UtilitiesClass(helper, monitor, config);
+
+            assetRouter = new AssetRouter();
+            bootsEditor = new Editors.BootsEditor(helper, monitor, manifest);
+            weaponsEditor = new Editors.WeaponsEditor(helper, monitor, manifest);
+            shopsEditor = new Editors.ShopsEditor(monitor, manifest);
+            mailEditor = new Editors.MailEditor(helper, manifest);
+            bigCraftablesEditor = new Editors.BigCraftablesEditor(helper, manifest);
+
+            // Provide our own sheets under slash-free names
+            assetRouter.Register(Assets.GetBootsSheetAsset(manifest), Assets.SmithBootsAssetPath);
+            assetRouter.Register(Assets.GetWeaponsSheetAsset(manifest), Assets.SmithWeaponsAssetPath);
+            assetRouter.Register(Assets.GetBootsColorsAsset(manifest), Assets.SmithBootsColorsAssetPath);
         }
 
+        // UI/minigame textures only
         public void LoadAssets()
         {
-
-            // Load textures
             try
             {
-                MinigameBarTexture = helper.ModContent.Load<Texture2D>("assets/minigame_bar.png");
-                AnvilTexture = helper.ModContent.Load<Texture2D>("assets/smith_anvil.png");
+                SmithingTextures[SmithingTextureKeys.MinigameBar] = helper.ModContent.Load<Texture2D>(Assets.MinigameAssetPath);
+                SmithingTextures[SmithingTextureKeys.AnvilUI] = helper.ModContent.Load<Texture2D>(Assets.AnvilAssetPath);
+                SmithingTextures[SmithingTextureKeys.HammerUI] = helper.ModContent.Load<Texture2D>(Assets.HammerAssetPath);
+                SmithingTextures[SmithingTextureKeys.AutoButtons] = helper.ModContent.Load<Texture2D>(Assets.AutoButtonsAssetPath);
+                SmithingTextures[SmithingTextureKeys.SmashButtons] = helper.ModContent.Load<Texture2D>(Assets.SmashButtonsAssetPath);
+
+                monitor.Log("UI textures loaded.", LogLevel.Info);
             }
             catch (Exception ex)
             {
-                monitor.Log($"Failed to load mod assets: {ex.Message}", LogLevel.Error);
+                monitor.Log($"Failed to load UI textures: {ex}", LogLevel.Error);
             }
         }
 
-    public void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
+        public void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
         {
-            if (e.Name.IsEquivalentTo("Data/BigCraftables"))
+            if (assetRouter.TryServeTextureAsset(e))
+                return;
+
+            if (e.Name.IsEquivalentTo("Data/BigCraftables")) { bigCraftablesEditor.Edit(e); return; }
+            if (e.Name.IsEquivalentTo("Data/mail")) { mailEditor.Edit(e); return; }
+            if (e.Name.IsEquivalentTo("Data/Shops")) { shopsEditor.Edit(e); return; }
+            if (e.Name.IsEquivalentTo("Data/Weapons")) { weaponsEditor.Edit(e); return; }
+            if (e.Name.IsEquivalentTo("Data/Boots")) { bootsEditor.Edit(e); return; }
+
+            if (e.Name.IsEquivalentTo(Assets.GetBigCraftableId(manifest)))
             {
-                AddBigCraftableData(e);
-            }
-            else if (e.Name.IsEquivalentTo("Data/mail"))
-            {
-                AddMailData(e);
-            }
-            else if (e.Name.IsEquivalentTo("Data/Shops"))
-            {
-                AddShopData(e);
-            }
-            else if (e.Name.IsEquivalentTo($"{manifest.UniqueID}.SmithAnvil"))
-            {
-                e.LoadFromModFile<Texture2D>("assets/smith_anvil.png", AssetLoadPriority.Medium);
+                e.LoadFromModFile<Texture2D>(Assets.AnvilAssetPath, AssetLoadPriority.Medium);
+                return;
             }
         }
-
-        private void AddBigCraftableData(AssetRequestedEventArgs e)
-        {
-            e.Edit(edit =>
-            {
-                var editor = edit.AsDictionary<string, BigCraftableData>();
-                editor.Data[BigCraftableId] = new BigCraftableData
-                {
-                    Name = BigCraftableId,
-                    DisplayName = helper.Translation.Get("anvil.display-name"),
-                    Description = helper.Translation.Get("anvil.description"),
-                    Price = 0,
-                    IsLamp = false,
-                    Texture = BigCraftableId,
-                    SpriteIndex = 0
-                };
-            });
-        }
-
-        private void AddMailData(AssetRequestedEventArgs e)
-        {
-            e.Edit(edit =>
-            {
-                var editor = edit.AsDictionary<string, string>();
-                editor.Data[MailId] = helper.Translation.Get(
-                    "anvil.mail",
-                    new { item = BigCraftableId }
-                );
-            });
-        }
-
-        private void AddShopData(AssetRequestedEventArgs e)
-        {
-            e.Edit(edit =>
-            {
-                var shops = edit.AsDictionary<string, ShopData>();
-
-                if (shops.Data.TryGetValue("AdventureShop", out var guild))
-                {
-                    guild.Items ??= new List<ShopItemData>();
-                    guild.Items.Add(new ShopItemData
-                    {
-                        Id = $"{manifest.UniqueID}_SmithAnvil",
-                        ItemId = $"(BC){BigCraftableId}",
-                        Price = GuildShopPrice,
-                        AvailableStock = GuildShopStock,
-                        AvailableStockLimit = LimitedStockMode.Global
-                    });
-                }
-            });
-        }
-
-
     }
 }

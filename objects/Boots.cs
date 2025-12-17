@@ -1,6 +1,5 @@
 ﻿using StardewValley;
 using StardewValley.Objects;
-using StardewValley.Buffs;
 
 namespace MyBootsMod
 {
