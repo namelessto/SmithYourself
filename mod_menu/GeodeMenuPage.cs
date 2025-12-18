@@ -1,99 +1,84 @@
-﻿using SmithYourself.mod_menu;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 
 namespace SmithYourself
 {
-    internal class GeodeMenuPage
+    internal static class GeodeMenuPage
     {
-        public static void GeodePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        private static readonly (string Key, string LabelKey)[] Geodes =
         {
-            configMenu.AddPage(
+            ("535", "geode.geode"),
+            ("536", "geode.frozen-geode"),
+            ("537", "geode.magma-geode"),
+            ("749", "geode.omni-geode"),
+            ("275", "geode.trove"),
+            ("791", "geode.coconut"),
+            ("MysteryBox", "geode.box"),
+            ("GoldenMysteryBox", "geode.gold-box"),
+            ("custom", "menu.enable-custom-geode"),
+        };
+
+        public static void GeodePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi menu)
+        {
+            EnsureGeodeDicts();
+
+            menu.AddPage(
                 mod: manifest,
                 pageId: "geode",
-                () => helper.Translation.Get("menu.geode-page")
+                pageTitle: () => helper.Translation.Get("menu.geode-page")
             );
 
-            configMenu.AddNumberOption(
+            menu.AddNumberOption(
                 mod: manifest,
                 name: () => helper.Translation.Get("menu.geode-amount-to-open"),
                 tooltip: () => helper.Translation.Get("menu.geode-amount-to-open-tooltip"),
                 getValue: () => ModEntry.Config.AmountGeodesToOpen,
-                setValue: value => ModEntry.Config.AmountGeodesToOpen = value,
+                setValue: v => ModEntry.Config.AmountGeodesToOpen = v,
                 interval: 1
             );
-            configMenu.AddBoolOption(
+
+            menu.AddBoolOption(
                 mod: manifest,
                 name: () => helper.Translation.Get("menu.enable-all-geode-open"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["all"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["all"] = value
+                getValue: () => GetGeodeAllowance("all"),
+                setValue: v => SetGeodeAllowance("all", v)
             );
 
-            ModMenu.AddSeparator(configMenu, manifest);
+            SmithYourself.mod_menu.MenuMaterialHelpers.AddSeparator(menu, manifest);
 
-            Func<string> mainText = () => helper.Translation.Get("menu.enable-geode-open") + " ";
+            Func<string> prefix = () => helper.Translation.Get("menu.enable-geode-open") + " ";
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("geode.geode"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["535"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["535"] = value
-            );
+            foreach (var (key, labelKey) in Geodes)
+            {
+                menu.AddBoolOption(
+                    mod: manifest,
+                    name: () => prefix() + helper.Translation.Get(labelKey),
+                    getValue: () => GetGeodeAllowance(key),
+                    setValue: v => SetGeodeAllowance(key, v)
+                );
+            }
+        }
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("geode.frozen-geode"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["536"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["536"] = value
-            );
+        private static void EnsureGeodeDicts()
+        {
+            ModEntry.Config.GeodeAllowances ??= new Dictionary<ToolType, Dictionary<string, bool>>();
+            if (!ModEntry.Config.GeodeAllowances.TryGetValue(ToolType.Geode, out var dict) || dict is null)
+                ModEntry.Config.GeodeAllowances[ToolType.Geode] = dict = new Dictionary<string, bool>();
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("geode.magma-geode"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["537"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["537"] = value
-            );
+            if (!dict.ContainsKey("all")) dict["all"] = true;
+            foreach (var (key, _) in Geodes)
+                if (!dict.ContainsKey(key)) dict[key] = true;
+        }
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("geode.omni-geode"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["749"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["749"] = value
-            );
+        private static bool GetGeodeAllowance(string key)
+        {
+            EnsureGeodeDicts();
+            return ModEntry.Config.GeodeAllowances[ToolType.Geode].TryGetValue(key, out var v) && v;
+        }
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("geode.trove"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["275"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["275"] = value
-            );
-
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("geode.coconut"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["791"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["791"] = value
-            );
-
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("geode.box"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["MysteryBox"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["MysteryBox"] = value
-            );
-
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("geode.gold-box"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["GoldenMysteryBox"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["GoldenMysteryBox"] = value
-            );
-
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("menu.enable-custom-geode"),
-                getValue: () => ModEntry.Config.GeodeAllowances[ToolType.Geode]["custom"],
-                setValue: value => ModEntry.Config.GeodeAllowances[ToolType.Geode]["custom"] = value
-            );
+        private static void SetGeodeAllowance(string key, bool value)
+        {
+            EnsureGeodeDicts();
+            ModEntry.Config.GeodeAllowances[ToolType.Geode][key] = value;
         }
     }
 }

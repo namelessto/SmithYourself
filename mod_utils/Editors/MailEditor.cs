@@ -18,7 +18,14 @@ namespace SmithYourself.mod_utils.Editors
             e.Edit(edit =>
             {
                 var editor = edit.AsDictionary<string, string>();
-                editor.Data[Assets.GetMailId(manifest)] = helper.Translation.Get("anvil.mail", new { item = Assets.GetBigCraftableId(manifest) });
+
+                // existing anvil mail
+                editor.Data[Assets.GetAnvilMailId(manifest)] =
+                    helper.Translation.Get("anvil.mail", new { item = Assets.GetBigCraftableId(manifest) });
+
+                // new boots mail
+                editor.Data[Assets.GetBootsMailId(manifest)] =
+                    helper.Translation.Get("anvil.mail.boots", new { boots = $"{manifest.UniqueID}.weathered_boots" });
             });
         }
     }

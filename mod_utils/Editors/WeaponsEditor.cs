@@ -25,15 +25,15 @@ namespace SmithYourself.mod_utils.Editors
 
                 foreach (var w in ContentDefinitions.CustomWeapons)
                 {
-                    string fullId = $"{manifest.UniqueID}_{w.Id}";
+                    string fullId = $"{manifest.UniqueID}.{w.Id}";
                     if (!Validation.ValidateSpriteIndex(monitor, fullId, w.SpriteIndex, weaponsMaxIndex, "Weapons"))
                         continue;
 
                     editor.Data[fullId] = new WeaponData
                     {
                         Name = fullId,
-                        DisplayName = helper.Translation.Get($"{w.Id}.display-name"),
-                        Description = helper.Translation.Get($"{w.Id}.description"),
+                        DisplayName = helper.Translation.Get($"weapon.{w.Id}.display-name"),
+                        Description = helper.Translation.Get($"weapon.{w.Id}.description"),
                         MinDamage = w.MinDamage,
                         MaxDamage = w.MaxDamage,
                         Type = w.Type,

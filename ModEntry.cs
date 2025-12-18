@@ -3,10 +3,19 @@ using SmithYourself.mod_utils;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Buffs;
 using SObject = StardewValley.Object;
 
 namespace SmithYourself
 {
+    internal enum AnvilAction
+    {
+        None,
+        BreakGeode,
+        UpgradeTrinket,
+        UpgradeTool,
+        UpgradeBoots
+    }
     internal sealed class ModEntry : Mod
     {
         public static ModConfig Config = null!;
@@ -20,10 +29,14 @@ namespace SmithYourself
         public static IMonitor MonitorStatic = null!;
         public static IModHelper HelperStatic = null!;
 
+        private string BuffId => $"{ModManifest.UniqueID}.BootSpeed";
+        private string? lastBootsId;
+
+
         public override void Entry(IModHelper helper)
         {
             Config = Helper.ReadConfig<ModConfig>() ?? new ModConfig();
-            utilities = new UtilitiesClass(helper, Monitor, Config);
+            utilities = new UtilitiesClass(helper, Monitor, Config, ModManifest);
             init = new Initialization(Helper, Monitor, Config, Helper.Translation, ModManifest);
             Popups = new PopupText(helper);
             MonitorStatic = Monitor;
@@ -33,14 +46,14 @@ namespace SmithYourself
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
             helper.Events.Content.AssetRequested += init.OnAssetRequested;
+            helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
+            helper.Events.Player.InventoryChanged += OnInventoryChanged;
         }
 
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
-            // load assets
             init.LoadAssets();
 
-            // register GMCM (optional)
             var gmcm = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
             if (gmcm != null)
             {
@@ -53,12 +66,91 @@ namespace SmithYourself
             }
         }
 
+        private void OnInventoryChanged(object? sender, InventoryChangedEventArgs e)
+        {
+            if (!e.IsLocalPlayer)
+                return;
+
+            Farmer player = Game1.player;
+            string bootsMailId = Assets.GetBootsMailId(ModManifest);
+
+            // HARD guard: already received or queued
+            if (player.hasOrWillReceiveMail(bootsMailId))
+                return;
+
+            // Only trigger when the Rusty Sword is actually added
+            if (!e.Added.Any(IsRustySword))
+                return;
+
+            // Queue mail for next day (safe)
+            player.mailForTomorrow.Add(bootsMailId);
+        }
+
+
+        private static bool IsRustySword(Item item)
+        {
+            return item?.QualifiedItemId == "(W)0";
+        }
+
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
         {
-            var player = Game1.player;
-            if (!player.hasOrWillReceiveMail(MailId)
-             && player.hasOrWillReceiveMail("guildMember"))
-                player.mailForTomorrow.Add(MailId);
+            Farmer player = Game1.player;
+
+            string anvilMailId = Assets.GetAnvilMailId(ModManifest);
+
+            // 2) Anvil mail: after finishing "Initiation" (i.e., after joining the guild)
+            if (!player.hasOrWillReceiveMail(anvilMailId)
+                && player.hasOrWillReceiveMail("guildMember"))
+            {
+                player.mailForTomorrow.Add(anvilMailId);
+            }
+        }
+
+        private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
+        {
+            if (!Context.IsWorldReady || !e.IsMultipleOf(10))
+                return;
+
+            string? bootsId = Game1.player.boots.Value?.ItemId;
+            if (bootsId == lastBootsId)
+                return;
+
+            lastBootsId = bootsId;
+
+            Game1.player.buffs.Remove(BuffId);
+
+            int speed = GetSpeedForBoots(bootsId);
+            if (speed <= 0)
+                return;
+
+            var boots = Game1.player.boots.Value;
+            if (boots == null)
+                return;
+
+            Game1.player.applyBuff(new Buff(
+                id: BuffId,
+                displayName: "Boot Speed",
+                displaySource: boots.displayName,
+                duration: Buff.ENDLESS,
+                effects: new BuffEffects { Speed = { speed } }
+            )
+            {
+                visible = true
+            });
+        }
+
+        private int GetSpeedForBoots(string? bootsId)
+        {
+            if (bootsId == null)
+                return 0;
+
+            foreach (var boot in ContentDefinitions.CustomBoots)
+            {
+                if (bootsId == $"{ModManifest.UniqueID}.{boot.Id}")
+                    return boot.SpeedBuff;
+            }
+
+            return 0;
         }
 
         private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
@@ -66,16 +158,13 @@ namespace SmithYourself
             if (!Context.IsWorldReady)
                 return;
 
-
             // Handle mobile input for GeodeMenu when it's active
             if (Game1.activeClickableMenu is GeodeMenu geodeMenu && Constants.TargetPlatform == GamePlatform.Android)
             {
                 try
                 {
                     if (geodeMenu.HandleMobileInput(e))
-                    {
                         return;
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -86,11 +175,7 @@ namespace SmithYourself
 
             // Don't handle world interactions when any menu is open
             if (Game1.activeClickableMenu != null)
-            {
                 return;
-            }
-
-            SObject? obj = null;
 
             if (Constants.TargetPlatform == GamePlatform.Android)
             {
@@ -107,17 +192,38 @@ namespace SmithYourself
             }
 
             if (!e.Button.IsActionButton())
-            {
                 return;
-            }
 
-            obj = utilities.GetObjectAtCursor() as SObject;
+            var obj = utilities.GetObjectAtCursor() as SObject;
             if (obj == null || obj.QualifiedItemId != $"(BC){BigCraftableId}")
-            {
                 return;
-            }
 
             InteractWithAnvil(obj);
+        }
+
+        private AnvilAction ChooseAction(Item? current)
+        {
+            if (current == null)
+                return AnvilAction.None;
+
+            // Highest priority: geode handling
+            if (utilities.CanBreakGeode(current))
+                return AnvilAction.BreakGeode;
+
+            // Compute candidates (don’t chain these with !canX; do the gating here)
+            bool canUpgradeBoots = utilities.CanUpgradeBoots(current);
+            bool canUpgradeTrinket = !canUpgradeBoots && utilities.CanImproveTrinket(current);
+            bool canUpgradeTool = !canUpgradeTrinket && !canUpgradeBoots && utilities.CanUpgradeTool(current);
+
+            // Boots upgrade is only relevant if it's actually a Boots item in-hand.
+            // Your utilities.CanUpgradeBoots(current) already does that type-check.
+
+            // Priority among upgrades (edit order here if you want different behavior)
+            if (canUpgradeBoots) return AnvilAction.UpgradeBoots;
+            if (canUpgradeTrinket) return AnvilAction.UpgradeTrinket;
+            if (canUpgradeTool) return AnvilAction.UpgradeTool;
+
+            return AnvilAction.None;
         }
 
         private void InteractWithAnvil(SObject obj)
@@ -142,16 +248,14 @@ namespace SmithYourself
                 }
 
                 if (isMinigameOpen)
-                {
                     return;
-                }
 
-                bool isGeode = utilities.CanBreakGeode(current);
-                bool canUpgradeTrinket = !isGeode && utilities.CanImproveTrinket(current);
-                bool canUpgradeTool = !isGeode && !canUpgradeTrinket && utilities.CanUpgradeTool(current);
+                AnvilAction action = ChooseAction(current);
 
+                if (action == AnvilAction.None)
+                    return;
 
-                if (isGeode)
+                if (action == AnvilAction.BreakGeode)
                 {
                     try
                     {
@@ -167,36 +271,44 @@ namespace SmithYourself
                     }
                 }
 
-                if (!canUpgradeTool && !canUpgradeTrinket)
-                {
-                    return;
-                }
-
+                // If we got here, we’re upgrading *something*.
+                // IMPORTANT: we deliberately allow boots/trinket/tool to flow into the same upgrade pipeline
+                // because your utilities.CanUpgradeX(...) methods set toolUpgradeData.ToolClassType/ToolLevel etc.
+                // (i.e. the “kind” is chosen before the upgrade happens).
                 try
                 {
                     if (Config.SkipMinigame)
                     {
-                        utilities.UpgradeTool(current, UpgradeResult.Normal);
+                        if (action == AnvilAction.UpgradeBoots)
+                            utilities.UpgradeBoots(current, UpgradeResult.Normal);
+                        else
+                            utilities.UpgradeTool(current, UpgradeResult.Normal);
+
+                        return;
                     }
-                    else if (init.SmithingTextures[SmithingTextureKeys.MinigameBar] != null)
+
+                    if (init.SmithingTextures[SmithingTextureKeys.MinigameBar] != null)
                     {
                         var minigame = new StrengthMinigame(
                             utilities,
-                            init.SmithingTextures[SmithingTextureKeys.MinigameBar]!
+                            init.SmithingTextures[SmithingTextureKeys.MinigameBar]!,
+                            action
                         );
+
                         minigame.GetObjectPosition(obj.TileLocation, Game1.player.Position);
                         Game1.activeClickableMenu = minigame;
                         isMinigameOpen = true;
+                        return;
                     }
-                    else
-                    {
+                    if (action == AnvilAction.UpgradeTool || action == AnvilAction.UpgradeTrinket)
                         utilities.UpgradeTool(current, UpgradeResult.Normal);
-                        Monitor.Log("MinigameBarTexture is null, cannot create minigame - Trying auto-upgrade", LogLevel.Warn);
-                    }
+                    else if (action == AnvilAction.UpgradeBoots)
+                        utilities.UpgradeBoots(current, UpgradeResult.Normal);
+                    Monitor.Log("MinigameBarTexture is null, cannot create minigame - Trying auto-upgrade", LogLevel.Warn);
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Error handling tool upgrade or minigame: {ex.Message}", LogLevel.Error);
+                    Monitor.Log($"Error handling upgrade or minigame: {ex.Message}", LogLevel.Error);
                     Monitor.Log($"Stack trace: {ex.StackTrace}", LogLevel.Debug);
                 }
             }

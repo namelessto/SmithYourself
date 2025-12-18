@@ -35,9 +35,9 @@ namespace SmithYourself
         private int minigameScore = 0;
         private int toolIndex = 0;
         private int lastHitMarkerPixels = -1; // stored pixel height from bottom of the bar (scaled) for a fixed marker
-
-
-        public StrengthMinigame(UtilitiesClass utilsClassInstance, Texture2D barBackgroundImage) : base(0, 0, 0, 0)
+                                              // StrengthMinigame.cs – add after the field declarations
+        private AnvilAction anvilAction = AnvilAction.None;
+        public StrengthMinigame(UtilitiesClass utilsClassInstance, Texture2D barBackgroundImage, AnvilAction action) : base(0, 0, 0, 0)
         {
             UtilsClass = utilsClassInstance;
             powerMeter = 0f;
@@ -51,6 +51,7 @@ namespace SmithYourself
             startupFrames = 0;
             isInCooldown = false;
             cooldownDropSpeed = ModEntry.Config.MinigameCooldown;
+            anvilAction = action;
         }
 
         public void GetObjectPosition(Vector2 objectTilePosition, Vector2 playerWorldPosition)
@@ -376,8 +377,10 @@ namespace SmithYourself
                 if (!shouldCloseMenu)  // Only process the result once
                 {
                     UpgradeResult result = DetermineUpgradeResult(minigameScore, maxRepeatAmount);
-                    if (result != UpgradeResult.Failed)
+                    if (result != UpgradeResult.Failed && (anvilAction == AnvilAction.UpgradeTool || anvilAction == AnvilAction.UpgradeTrinket))
                         newItem = UtilsClass.UpgradeTool(currentItem, result);
+                    else if (result != UpgradeResult.Failed && anvilAction == AnvilAction.UpgradeBoots)
+                        newItem = UtilsClass.UpgradeBoots(currentItem, result);
                     else
                         UtilsClass.RemoveMaterial(result);
 

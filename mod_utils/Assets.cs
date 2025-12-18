@@ -17,12 +17,17 @@ namespace SmithYourself.mod_utils
         public const string SmithWeaponsAssetPath = "assets/weapons.png";
 
         public static string GetBigCraftableId(IManifest manifest) => $"{manifest.UniqueID}.SmithAnvil";
-        public static string GetMailId(IManifest manifest) => $"{manifest.UniqueID}.ReceiveAnvil";
+        public static string GetRustyMaceId(IManifest manifest) => $"{manifest.UniqueID}.rusty_mace";
+        public static string GetRustyDaggerId(IManifest manifest) => $"{manifest.UniqueID}.rusty_dagger";
+        public static string GetLeatherBootsId(IManifest manifest) => $"{manifest.UniqueID}.weathered_boots";
+
+        public static string GetAnvilMailId(IManifest manifest) => $"{manifest.UniqueID}.ReceiveAnvil";
+        public static string GetBootsMailId(IManifest manifest) => $"{manifest.UniqueID}.ReceiveBoots";
 
         // IMPORTANT: Data/Boots is slash-delimited => these MUST NOT contain "/"
         // Use backslash names for Data/Boots string; prevents "/" delimiter issues
-        public static string GetBootsSheetAsset(IManifest manifest) => $"{manifest.UniqueID}\\Boots";
-        public static string GetBootsColorsAsset(IManifest manifest) => $"{manifest.UniqueID}\\BootsColor";
+        public static string GetBootsSheetAsset(IManifest manifest) => $"{manifest.UniqueID}.Boots";
+        public static string GetBootsColorsAsset(IManifest manifest) => $"{manifest.UniqueID}.BootsColor";
 
         public static string GetWeaponsSheetAsset(IManifest manifest) => $"{manifest.UniqueID}.weapons";
     }

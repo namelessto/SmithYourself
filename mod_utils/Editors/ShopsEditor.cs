@@ -29,25 +29,39 @@ namespace SmithYourself.mod_utils.Editors
 
                 guild.Items.Add(new ShopItemData
                 {
-                    Id = $"{manifest.UniqueID}_SmithAnvil",
+                    Id = $"{manifest.UniqueID}.SmithAnvil",
                     ItemId = $"(BC){Assets.GetBigCraftableId(manifest)}",
                     Price = GuildShopPrice,
                     AvailableStock = GuildShopStock,
                     AvailableStockLimit = LimitedStockMode.Global
                 });
 
-                foreach (var boot in ContentDefinitions.CustomBoots)
+                guild.Items.Add(new ShopItemData
                 {
-                    string fullId = $"{manifest.UniqueID}_{boot.Id}";
-                    guild.Items.Add(new ShopItemData
-                    {
-                        Id = $"{manifest.UniqueID}_SellBoot_{boot.Id}",
-                        ItemId = $"(B){fullId}",
-                        Price = boot.Price,
-                        AvailableStock = 1,
-                        AvailableStockLimit = LimitedStockMode.Global
-                    });
-                }
+                    Id = Assets.GetRustyMaceId(manifest),
+                    ItemId = $"(W){Assets.GetRustyMaceId(manifest)}",
+                    Price = 100,
+                    AvailableStock = GuildShopStock,
+                    AvailableStockLimit = LimitedStockMode.Global
+                });
+
+                guild.Items.Add(new ShopItemData
+                {
+                    Id = Assets.GetRustyDaggerId(manifest),
+                    ItemId = $"(W){Assets.GetRustyDaggerId(manifest)}",
+                    Price = 100,
+                    AvailableStock = GuildShopStock,
+                    AvailableStockLimit = LimitedStockMode.Global
+                });
+
+                guild.Items.Add(new ShopItemData
+                {
+                    Id = Assets.GetLeatherBootsId(manifest),
+                    ItemId = $"(B){Assets.GetLeatherBootsId(manifest)}",
+                    Price = 300,
+                    AvailableStock = GuildShopStock,
+                    AvailableStockLimit = LimitedStockMode.Global
+                });
             });
         }
     }

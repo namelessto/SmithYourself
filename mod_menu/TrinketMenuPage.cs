@@ -2,128 +2,86 @@
 
 namespace SmithYourself.mod_menu
 {
-    internal class TrinketMenuPage
+    internal static class TrinketMenuPage
     {
-        public static void TrinketPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        private static readonly (string TrinketKey, string LabelKey, int TierKey)[] Trinkets =
         {
-            configMenu.AddPage(
+            ("ParrotEgg",    "trinket.parrot-egg",    0),
+            ("FairyBox",     "trinket.fairy-box",     1),
+            ("IridiumSpur",  "trinket.gold-spur",     2),
+            ("IceRod",       "trinket.ice-rod",       3),
+            ("MagicQuiver",  "trinket.magic-quiver",  4),
+        };
+
+        public static void TrinketPage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi menu)
+        {
+            EnsureTrinketDicts();
+
+            menu.AddPage(
                 mod: manifest,
                 pageId: "trinket",
-                () => helper.Translation.Get("menu.trinket-page")
-            );
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.enable-trinkets-upgrade"),
-                getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["all"],
-                setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["all"] = value
+                pageTitle: () => helper.Translation.Get("menu.trinket-page")
             );
 
-            Func<string> mainText = () => helper.Translation.Get("menu.enable-upgrade") + " ";
-            ModMenu.AddSeparator(configMenu, manifest);
-            // Parrot Egg
-            configMenu.AddBoolOption(
+            menu.AddBoolOption(
                 mod: manifest,
-                name: () => mainText() + helper.Translation.Get("trinket.parrot-egg"),
-                getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["ParrotEgg"],
-                setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["ParrotEgg"] = value
+                name: () => helper.Translation.Get("menu.enable-trinkets-upgrade"),
+                getValue: () => GetTrinketAllowance("all"),
+                setValue: v => SetTrinketAllowance("all", v)
             );
-            configMenu.AddTextOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-id"),
-                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][0],
-                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][0] = value
-            );
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-quantity"),
-                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][0],
-                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][0] = value,
-                min: 0
-            );
-            ModMenu.AddSeparator(configMenu, manifest);
-            //Fairy Box
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("trinket.fairy-box"),
-                getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["FairyBox"],
-                setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["FairyBox"] = value
-            );
-            configMenu.AddTextOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-id"),
-                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][1],
-                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][1] = value
-            );
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-quantity"),
-                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][1],
-                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][1] = value,
-                min: 0
-            );
-            ModMenu.AddSeparator(configMenu, manifest);
-            //Iridium Spur
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("trinket.gold-spur"),
-                getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["IridiumSpur"],
-                setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["IridiumSpur"] = value
-            );
-            configMenu.AddTextOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-id"),
-                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][2],
-                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][2] = value
-            );
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-quantity"),
-                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][2],
-                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][2] = value,
-                min: 0
-            );
-            ModMenu.AddSeparator(configMenu, manifest);
-            //Ice Rod
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("trinket.ice-rod"),
-                getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["IceRod"],
-                setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["IceRod"] = value
-            );
-            configMenu.AddTextOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-id"),
-                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][3],
-                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][3] = value
-            );
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-quantity"),
-                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][3],
-                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][3] = value,
-                min: 0
-            );
-            ModMenu.AddSeparator(configMenu, manifest);
-            //Magic Quiver
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => mainText() + helper.Translation.Get("trinket.magic-quiver"),
-                getValue: () => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["MagicQuiver"],
-                setValue: value => ModEntry.Config.TrinketAllowances[ToolType.Trinket]["MagicQuiver"] = value
-            );
-            configMenu.AddTextOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-id"),
-                getValue: () => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][4],
-                setValue: value => ModEntry.Config.UpgradeItemsId[ToolType.Trinket][4] = value
-            );
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.item-quantity"),
-                getValue: () => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][4],
-                setValue: value => ModEntry.Config.UpgradeAmounts[ToolType.Trinket][4] = value,
-                min: 0
-            );
+
+            MenuMaterialHelpers.AddSeparator(menu, manifest);
+
+            Func<string> enablePrefix = () => helper.Translation.Get("menu.enable-upgrade") + " ";
+
+            foreach (var (trinketKey, labelKey, tierKey) in Trinkets)
+            {
+                // enable/disable that trinket upgrade
+                menu.AddBoolOption(
+                    mod: manifest,
+                    name: () => enablePrefix() + helper.Translation.Get(labelKey),
+                    getValue: () => GetTrinketAllowance(trinketKey),
+                    setValue: v => SetTrinketAllowance(trinketKey, v)
+                );
+
+                // materials editor for that trinket "tier"
+                MenuMaterialHelpers.AddMaterialsEditor(
+                    helper: helper,
+                    manifest: manifest,
+                    menu: menu,
+                    toolType: ToolType.Trinket,
+                    tierKey: tierKey,
+                    tierLabel: () => helper.Translation.Get(labelKey)
+                );
+
+                // no trailing separator needed; editor already separators per slot,
+                // but we add a strong one between trinkets for readability
+                MenuMaterialHelpers.AddSeparator(menu, manifest);
+            }
+        }
+
+        private static void EnsureTrinketDicts()
+        {
+            ModEntry.Config.TrinketAllowances ??= new Dictionary<ToolType, Dictionary<string, bool>>();
+            if (!ModEntry.Config.TrinketAllowances.TryGetValue(ToolType.Trinket, out var dict) || dict is null)
+                ModEntry.Config.TrinketAllowances[ToolType.Trinket] = dict = new Dictionary<string, bool>();
+
+            // ensure keys exist (prevents KeyNotFound)
+            if (!dict.ContainsKey("all")) dict["all"] = true;
+            foreach (var (key, _, _) in Trinkets)
+                if (!dict.ContainsKey(key)) dict[key] = true;
+        }
+
+        private static bool GetTrinketAllowance(string key)
+        {
+            EnsureTrinketDicts();
+            return ModEntry.Config.TrinketAllowances[ToolType.Trinket].TryGetValue(key, out var v) && v;
+        }
+
+        private static void SetTrinketAllowance(string key, bool value)
+        {
+            EnsureTrinketDicts();
+            ModEntry.Config.TrinketAllowances[ToolType.Trinket][key] = value;
         }
     }
 }

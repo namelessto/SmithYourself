@@ -9,7 +9,7 @@ namespace SmithYourself.mod_utils
     {
         public const string MinigameBar = "minigame_bar";
         public const string AnvilUI = "anvil_ui";
-        public const string HammerUI = "hammer_ui";
+        public const string Hammer = "hammer";
         public const string AutoButtons = "auto_buttons";
         public const string SmashButtons = "smash_buttons";
     }
@@ -40,7 +40,7 @@ namespace SmithYourself.mod_utils
             config = Config;
             i18n = I18n;
             manifest = Manifest;
-            utilities = new UtilitiesClass(helper, monitor, config);
+            utilities = new UtilitiesClass(helper, monitor, config, manifest);
 
             assetRouter = new AssetRouter();
             bootsEditor = new Editors.BootsEditor(helper, monitor, manifest);
@@ -62,7 +62,7 @@ namespace SmithYourself.mod_utils
             {
                 SmithingTextures[SmithingTextureKeys.MinigameBar] = helper.ModContent.Load<Texture2D>(Assets.MinigameAssetPath);
                 SmithingTextures[SmithingTextureKeys.AnvilUI] = helper.ModContent.Load<Texture2D>(Assets.AnvilAssetPath);
-                SmithingTextures[SmithingTextureKeys.HammerUI] = helper.ModContent.Load<Texture2D>(Assets.HammerAssetPath);
+                SmithingTextures[SmithingTextureKeys.Hammer] = helper.ModContent.Load<Texture2D>(Assets.HammerAssetPath);
                 SmithingTextures[SmithingTextureKeys.AutoButtons] = helper.ModContent.Load<Texture2D>(Assets.AutoButtonsAssetPath);
                 SmithingTextures[SmithingTextureKeys.SmashButtons] = helper.ModContent.Load<Texture2D>(Assets.SmashButtonsAssetPath);
 
@@ -83,7 +83,7 @@ namespace SmithYourself.mod_utils
             if (e.Name.IsEquivalentTo("Data/mail")) { mailEditor.Edit(e); return; }
             if (e.Name.IsEquivalentTo("Data/Shops")) { shopsEditor.Edit(e); return; }
             if (e.Name.IsEquivalentTo("Data/Weapons")) { weaponsEditor.Edit(e); return; }
-            if (e.Name.IsEquivalentTo("Data/Boots")) { bootsEditor.Edit(e); return; }
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Boots")) { bootsEditor.Edit(e); return; }
 
             if (e.Name.IsEquivalentTo(Assets.GetBigCraftableId(manifest)))
             {

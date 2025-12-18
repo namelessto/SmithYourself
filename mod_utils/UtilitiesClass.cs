@@ -4,21 +4,32 @@ using StardewValley.Objects.Trinkets;
 using StardewValley.Tools;
 using SObject = StardewValley.Object;
 using StardewValley.Menus;
+using StardewValley.Objects;
 
 namespace SmithYourself
 {
+
+    internal sealed class MaterialRequirement
+    {
+        public string ItemId { get; set; } = "";
+        public int Amount { get; set; } = 1;
+    }
+
     internal class UtilitiesClass
     {
         private readonly IModHelper helper;
         private readonly ModConfig config;
         private readonly IMonitor monitor;
+        private readonly IManifest manifest;
+
         private readonly ToolUpgradeData toolUpgradeData = new();
 
-        public UtilitiesClass(IModHelper modHelper, IMonitor modMonitor, ModConfig modConfig)
+        public UtilitiesClass(IModHelper modHelper, IMonitor modMonitor, ModConfig modConfig, IManifest modManifest)
         {
             helper = modHelper ?? throw new ArgumentNullException(nameof(modHelper));
             monitor = modMonitor ?? throw new ArgumentNullException(nameof(modMonitor));
             config = modConfig ?? throw new ArgumentNullException(nameof(modConfig));
+            manifest = modManifest ?? throw new ArgumentNullException(nameof(modManifest));
         }
 
         public SObject? GetObjectAtCursor()
@@ -26,22 +37,194 @@ namespace SmithYourself
             var tile = Game1.currentCursorTile;
 
             if (!Utility.tileWithinRadiusOfPlayer((int)tile.X, (int)tile.Y, 1, Game1.player))
-            {
                 tile = Game1.player.GetGrabTile();
-            }
 
             return Game1.currentLocation?.getObjectAtTile((int)tile.X, (int)tile.Y);
         }
 
+        // NOTE: you said you'll rename later; kept as-is.
+        private string NormalizeBootId(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return "";
+
+            id = id.Trim();
+
+            if (id.Contains('.'))
+                return id;
+
+            return $"{manifest.UniqueID}.{id}";
+        }
+
+        // For ToolID chains (Sword/Mace/Dagger/Scythe) which can contain:
+        // "(W)0", "0", "YourModId.foo", "foo"
+        private string ResolveWeaponQualifiedId(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return "";
+
+            id = id.Trim();
+
+            if (id.StartsWith("(W)", StringComparison.Ordinal))
+                return id;
+
+            if (id.Contains('.'))
+                return $"(W){id}";
+
+            bool isNumeric = id.All(char.IsDigit);
+            if (isNumeric)
+                return $"(W){id}";
+
+            return $"(W){manifest.UniqueID}.{id}";
+        }
+
+        // -------------------------------
+        // Option-A material helpers
+        // -------------------------------
+        private bool TryGetRequirements(ToolType type, int level, out List<MaterialRequirement> requirements)
+        {
+            requirements = new List<MaterialRequirement>();
+
+            if (!config.UpgradeMaterials.TryGetValue(type, out var byLevel) || byLevel is null)
+                return false;
+
+            if (!byLevel.TryGetValue(level, out var reqs) || reqs is null)
+                return false;
+
+            // Filter out "ghost" / default entries
+            requirements = reqs
+                .Where(r => r is not null
+                            && !string.IsNullOrWhiteSpace(r.ItemId)
+                            && r.Amount > 0)
+                .ToList();
+
+            return requirements.Count > 0;
+        }
+
+
+        private int ApplyMinimumCostRule(int amount)
+        {
+            if (amount <= 0)
+                return 0;
+
+            if (config.MinimumToolsUpgradeCost && toolUpgradeData.ToolClassType != ToolType.Trinket)
+                return 1;
+
+            if (config.MinimumTrinketsUpgradeCost && toolUpgradeData.ToolClassType == ToolType.Trinket)
+                return 1;
+
+            return amount;
+        }
+
+        private static int ApplyResultScaling(int baseAmount, UpgradeResult result)
+        {
+            if (baseAmount <= 0)
+                return 0;
+
+            const float criticalReductionPercentage = 0.25f;
+
+            return result switch
+            {
+                UpgradeResult.Failed => (int)(baseAmount * criticalReductionPercentage),
+                UpgradeResult.Critical => baseAmount - (int)(baseAmount * criticalReductionPercentage),
+                _ => baseAmount
+            };
+        }
+
+        private string ResolveObjectName(string objectId)
+        {
+            try
+            {
+                return new SObject(objectId, 1).DisplayName;
+            }
+            catch
+            {
+                return objectId;
+            }
+        }
+
+        private string FormatRequirements(IEnumerable<MaterialRequirement> reqs)
+        {
+            // "20 x Iridium Bar • 3 x Prismatic Shard"
+            return string.Join(" & ", reqs.Select(r => $"{r.Amount} x {ResolveObjectName(r.ItemId)}"));
+        }
+
+        // -------------------------------
+        // Boots
+        // -------------------------------
+        public bool CanUpgradeBoots(Item? currentItem)
+        {
+            if (currentItem is null)
+            {
+                ShowMessage(helper.Translation.Get("tool.empty"), HUDMessage.error_type);
+                return false;
+            }
+
+            if (currentItem is not Boots boots)
+                return false;
+
+            if (!config.ToolID.TryGetValue(ToolType.Boots, out var bootsChain) || bootsChain is null || bootsChain.Count == 0)
+                return false;
+
+            // Ensure material mapping exists (PlayerHasItem depends on it)
+            if (!config.UpgradeMaterials.TryGetValue(ToolType.Boots, out var byLevel) || byLevel is null || byLevel.Count == 0)
+                return false;
+
+            string itemId = boots.ItemId;
+
+            int currentLevel = -1;
+            for (int i = 0; i < bootsChain.Count; i++)
+            {
+                if (NormalizeBootId(bootsChain[i]) == itemId)
+                {
+                    currentLevel = i;
+                    break;
+                }
+            }
+
+            if (currentLevel < 0)
+                return false;
+
+            toolUpgradeData.ToolClassType = ToolType.Boots;
+            toolUpgradeData.ToolLevel = currentLevel;
+
+            if (!IsUpgradeAllowed(ToolType.Boots, currentLevel))
+                return false;
+
+            if (config.FreeToolsUpgrade)
+                return true;
+
+            return PlayerHasItem();
+        }
+
+        public Item UpgradeBoots(Item currentItem, UpgradeResult result)
+        {
+            if (toolUpgradeData.ToolClassType != ToolType.Boots)
+                return currentItem;
+
+            string newItemId = GetNextLevelId();
+            newItemId = NormalizeBootId(newItemId);
+
+            var newItem = ItemRegistry.Create(newItemId, 1);
+            Game1.player.removeItemFromInventory(currentItem);
+            Game1.player.addItemToInventory(newItem);
+
+            if (!config.FreeToolsUpgrade)
+                RemoveMaterial(result);
+
+            return newItem;
+        }
+
+        // -------------------------------
+        // Geodes & Trinkets (unchanged behavior; cost now via UpgradeMaterials)
+        // -------------------------------
         public bool CanBreakGeode(Item item)
         {
             string message;
             bool itemIsGeode = Utility.IsGeode(item);
 
             if (!itemIsGeode)
-            {
                 return false;
-            }
 
             if (config.GeodeAllowances[ToolType.Geode]["all"])
             {
@@ -49,26 +232,18 @@ namespace SmithYourself
                 {
                     if (config.GeodeAllowances[ToolType.Geode][item.ItemId] is bool allowed && allowed)
                         return allowed;
-                    else
-                    {
-                        message = helper.Translation.Get("geode.disabled");
-                        ShowMessage(message, HUDMessage.error_type);
-                        return false;
-                    }
+
+                    message = helper.Translation.Get("geode.disabled");
+                    ShowMessage(message, HUDMessage.error_type);
+                    return false;
                 }
                 catch
                 {
-                    if (config.GeodeAllowances[ToolType.Geode]["custom"])
-                    {
-                        return true;
-                    }
-                    return false;
+                    return config.GeodeAllowances[ToolType.Geode]["custom"];
                 }
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public bool CanImproveTrinket(Item item)
@@ -77,6 +252,7 @@ namespace SmithYourself
 
             if (item is not Trinket trinket)
                 return false;
+
             toolUpgradeData.ToolLevel = trinket.ItemId switch
             {
                 "ParrotEgg" => 0,
@@ -102,138 +278,201 @@ namespace SmithYourself
                 ShowMessage(helper.Translation.Get("tool.cant-upgrade"), HUDMessage.error_type);
                 return false;
             }
+
             if (!canImprove)
             {
                 ShowMessage(helper.Translation.Get("tool.max-level"), HUDMessage.newQuest_type);
                 return false;
             }
+
             if (config.TrinketAllowances[ToolType.Trinket]["all"])
             {
                 if (config.TrinketAllowances[ToolType.Trinket].TryGetValue(item.ItemId, out var allowed) && allowed)
                 {
-
                     if (config.FreeTrinketsUpgrade)
-                    {
                         return true;
-                    }
+
                     return PlayerHasItem();
                 }
+
                 return false;
             }
-
 
             return false;
         }
 
+        // -------------------------------
+        // Main tool upgrade gate
+        // -------------------------------
         public bool CanUpgradeTool(Item currentItem)
         {
             string message;
-            bool canUpgrade = false;
 
-            if (currentItem == null)
+            if (currentItem is null)
             {
                 message = helper.Translation.Get("tool.empty");
                 ShowMessage(message, HUDMessage.error_type);
                 return false;
             }
 
-            if (currentItem is Trinket || Utility.IsGeode(currentItem))
-            {
+            // Dedicated flows elsewhere
+            if (currentItem is Trinket || Utility.IsGeode(currentItem) || currentItem is Boots)
                 return false;
-            }
 
             toolUpgradeData.ToolClassType = ToolType.Undefined;
+            toolUpgradeData.ToolLevel = -1;
+
             foreach (var toolTypeKey in config.ToolID.Keys)
             {
-                if (config.ToolID[toolTypeKey].Any(value => value.Contains(currentItem.ItemId)))
-                {
+                // Bag/Trash handled later
+                if (toolTypeKey == ToolType.Bag || toolTypeKey == ToolType.Trash)
+                    continue;
 
-                    toolUpgradeData.ToolClassType = toolTypeKey;
+                bool isSwordMaceDagger =
+                    toolTypeKey == ToolType.Sword ||
+                    toolTypeKey == ToolType.Mace ||
+                    toolTypeKey == ToolType.Dagger;
 
-                    if (currentItem is Tool currentTool)
-                    {
-                        toolUpgradeData.ToolLevel = currentTool.ItemId switch
-                        {
-                            "47" => 0,
-                            "53" => 1,
-                            "66" => 2,
-                            _ => currentTool.UpgradeLevel
-                        };
-                        canUpgrade = IsUpgradeAllowed(toolUpgradeData.ToolClassType, toolUpgradeData.ToolLevel);
-                        if (!canUpgrade)
-                        {
-                            return false;
-                        }
-                        break;
-                    }
-                }
-                else if (toolTypeKey == ToolType.Bag)
+                bool isScythe = toolTypeKey == ToolType.Scythe;
+                bool isAnyWeaponType = isSwordMaceDagger || isScythe;
+
+                // Type gate
+                if (isAnyWeaponType)
                 {
-                    int currentInventorySize = Game1.player.MaxItems;
-                    if (config.UpgradeItemsId[ToolType.Bag].ContainsValue(currentItem.ItemId))
-                    {
-                        toolUpgradeData.ToolClassType = ToolType.Bag;
-                        toolUpgradeData.ToolLevel = currentInventorySize;
-                        canUpgrade = IsUpgradeAllowed(toolUpgradeData.ToolClassType, toolUpgradeData.ToolLevel);
-                        if (!canUpgrade)
-                        {
-                            return false;
-                        }
-                        break;
-                    }
+                    if (currentItem is not MeleeWeapon)
+                        continue;
                 }
-                else if (toolTypeKey == ToolType.Trash)
+                else
                 {
-                    if (currentItem.Category == -20)
-                    {
-                        toolUpgradeData.ToolClassType = ToolType.Trash;
-                        toolUpgradeData.ToolLevel = Game1.player.trashCanLevel;
-                        canUpgrade = IsUpgradeAllowed(toolUpgradeData.ToolClassType, toolUpgradeData.ToolLevel);
-                        if (!canUpgrade)
-                        {
-                            return false;
-                        }
-                        break;
-                    }
+                    if (currentItem is not Tool)
+                        continue;
                 }
 
+                bool match;
+
+                if (isAnyWeaponType)
+                {
+                    string currentWeaponQid = currentItem.QualifiedItemId;
+
+                    match = config.ToolID[toolTypeKey]
+                        .Any(cfg => ResolveWeaponQualifiedId(cfg) == currentWeaponQid);
+                }
+                else
+                {
+                    string currentToolId = currentItem.ItemId;
+
+                    match = config.ToolID[toolTypeKey]
+                        .Any(cfg => cfg == currentToolId);
+                }
+
+                if (!match)
+                    continue;
+
+                toolUpgradeData.ToolClassType = toolTypeKey;
+
+                if (isAnyWeaponType)
+                {
+                    string currentWeaponQid = currentItem.QualifiedItemId;
+
+                    List<string> weaponChain = config.ToolID[toolTypeKey]
+                        .Select(ResolveWeaponQualifiedId)
+                        .ToList();
+
+                    toolUpgradeData.ToolLevel = weaponChain.FindIndex(id => id == currentWeaponQid);
+                }
+                else
+                {
+                    Tool tool = (Tool)currentItem;
+
+                    toolUpgradeData.ToolLevel = tool.ItemId switch
+                    {
+                        "47" => 0,
+                        "53" => 1,
+                        "66" => 2,
+                        _ => tool.UpgradeLevel
+                    };
+                }
+
+                if (!IsUpgradeAllowed(toolUpgradeData.ToolClassType, toolUpgradeData.ToolLevel))
+                    return false;
+
+                break;
             }
+
+            // ---- Bag special-case ----
+            if (toolUpgradeData.ToolClassType == ToolType.Undefined)
+            {
+                int currentInventorySize = Game1.player.MaxItems;
+
+                bool matchesAnyBagRequirement =
+                    config.UpgradeMaterials.TryGetValue(ToolType.Bag, out var bagLevels) &&
+                    bagLevels.Values.SelectMany(v => v).Any(r => r.ItemId == currentItem.ItemId);
+
+                if (matchesAnyBagRequirement)
+                {
+                    toolUpgradeData.ToolClassType = ToolType.Bag;
+                    toolUpgradeData.ToolLevel = currentInventorySize;
+
+                    if (!IsUpgradeAllowed(toolUpgradeData.ToolClassType, toolUpgradeData.ToolLevel))
+                        return false;
+                }
+            }
+
+            // ---- Trash special-case ----
+            if (toolUpgradeData.ToolClassType == ToolType.Undefined)
+            {
+                if (currentItem.Category == -20)
+                {
+                    toolUpgradeData.ToolClassType = ToolType.Trash;
+                    toolUpgradeData.ToolLevel = Game1.player.trashCanLevel;
+
+                    if (!IsUpgradeAllowed(toolUpgradeData.ToolClassType, toolUpgradeData.ToolLevel))
+                        return false;
+                }
+            }
+
+            // ---- Final checks ----
             switch (toolUpgradeData.ToolClassType)
             {
                 case ToolType.Geode:
+                case ToolType.Boots:
                     return false;
+
                 case ToolType.Undefined:
                     message = helper.Translation.Get("tool.cant-upgrade");
                     ShowMessage(message, HUDMessage.error_type);
                     return false;
+
                 case ToolType.Trash:
                     toolUpgradeData.ToolLevel = Game1.player.trashCanLevel;
                     break;
+
                 case ToolType.Rod:
-                    toolUpgradeData.ToolLevel = (toolUpgradeData.ToolLevel == 0 && config.SkipTrainingRod) ? toolUpgradeData.ToolLevel + 1 : toolUpgradeData.ToolLevel;
-                    break;
-                default:
+                    toolUpgradeData.ToolLevel =
+                        (toolUpgradeData.ToolLevel == 0 && config.SkipTrainingRod)
+                            ? toolUpgradeData.ToolLevel + 1
+                            : toolUpgradeData.ToolLevel;
                     break;
             }
 
             if (config.FreeToolsUpgrade)
-            {
                 return true;
-            }
 
             return PlayerHasItem();
-
         }
+
         private bool IsUpgradeAllowed(ToolType toolClassType, int toolLevel)
         {
             string message;
-            int maxLevel = config.UpgradeItemsId[toolClassType].Count;
+
+            int maxLevel = config.UpgradeMaterials[toolClassType].Count;
             maxLevel = toolClassType switch
             {
                 ToolType.Pan => maxLevel + 2,
                 ToolType.Bag => (maxLevel + 1) * 12,
                 _ => maxLevel
             };
+
             if (!config.UpgradeAllowances.TryGetValue(toolClassType, out var allowances))
             {
                 message = helper.Translation.Get("tool.cant-upgrade");
@@ -264,61 +503,61 @@ namespace SmithYourself
 
             return true;
         }
+
         public void ShowMessage(string message, int type)
         {
             HUDMessage hudMessage = new HUDMessage(message, type);
             Game1.addHUDMessage(hudMessage);
         }
+
         public bool PlayerHasItem()
         {
-            string message;
-            int requiredAmount;
-            string requiredItemId = config.UpgradeItemsId[toolUpgradeData.ToolClassType][toolUpgradeData.ToolLevel];
-            string requiredItemName = new SObject(requiredItemId, 1).DisplayName;
-
-            if (config.MinimumToolsUpgradeCost && toolUpgradeData.ToolClassType != ToolType.Trinket)
-            {
-                requiredAmount = 1;
-            }
-            else if (config.MinimumTrinketsUpgradeCost && toolUpgradeData.ToolClassType == ToolType.Trinket)
-            {
-                requiredAmount = 1;
-            }
-            else
-            {
-                requiredAmount = config.UpgradeAmounts[toolUpgradeData.ToolClassType][toolUpgradeData.ToolLevel];
-            }
-
-            if (requiredAmount <= 0) return true;
-
-            int totalAmount = Game1.player.Items
-                .Where(item => item is SObject obj && obj.ItemId == requiredItemId)
-                .Sum(item => ((SObject)item).Stack);
-
-            if (totalAmount >= requiredAmount)
-            {
+            if (!TryGetRequirements(toolUpgradeData.ToolClassType, toolUpgradeData.ToolLevel, out var reqs) || reqs.Count == 0)
                 return true;
-            }
-            else
+
+            foreach (var req in reqs)
             {
-                message = helper.Translation.Get("tool.missing-materials", new { ItemAmount = requiredAmount, itemName = requiredItemName });
-                ShowMessage(message, HUDMessage.error_type);
-                return false;
+                int needed = ApplyMinimumCostRule(req.Amount);
+                if (needed <= 0)
+                    continue;
+
+                int totalAmount = Game1.player.Items
+                    .Where(item => item is SObject obj && obj.ItemId == req.ItemId)
+                    .Sum(item => ((SObject)item).Stack);
+
+                if (totalAmount < needed)
+                {
+                    string itemName = ResolveObjectName(req.ItemId);
+                    string msg = helper.Translation.Get("tool.missing-materials", new { ItemAmount = needed, itemName });
+
+                    ShowMessage(msg, HUDMessage.error_type);
+                    return false;
+                }
             }
+
+            return true;
         }
+
         public Item UpgradeTool(Item currentItem, UpgradeResult result)
         {
             Item finalItem = currentItem;
             Tool currentTool;
             Tool newTool;
 
-            if (toolUpgradeData.ToolClassType != ToolType.Trash && toolUpgradeData.ToolClassType != ToolType.Bag && toolUpgradeData.ToolClassType != ToolType.Trinket)
+            if (toolUpgradeData.ToolClassType != ToolType.Trash &&
+                toolUpgradeData.ToolClassType != ToolType.Bag &&
+                toolUpgradeData.ToolClassType != ToolType.Trinket)
             {
                 string newItemId = GetNextLevelId();
 
-                if (toolUpgradeData.ToolClassType == ToolType.Scythe)
+                if (toolUpgradeData.ToolClassType == ToolType.Scythe ||
+                    toolUpgradeData.ToolClassType == ToolType.Sword ||
+                    toolUpgradeData.ToolClassType == ToolType.Mace ||
+                    toolUpgradeData.ToolClassType == ToolType.Dagger)
                 {
+                    // Weapons are MeleeWeapon; IDs might be local mod ids, so normalize
                     currentTool = (MeleeWeapon)currentItem;
+                    newItemId = NormalizeBootId(newItemId);
                 }
                 else
                 {
@@ -327,7 +566,10 @@ namespace SmithYourself
 
                 var tempItem = ItemRegistry.Create(newItemId, 1);
 
-                if (toolUpgradeData.ToolClassType == ToolType.Scythe)
+                if (toolUpgradeData.ToolClassType == ToolType.Scythe ||
+                    toolUpgradeData.ToolClassType == ToolType.Sword ||
+                    toolUpgradeData.ToolClassType == ToolType.Mace ||
+                    toolUpgradeData.ToolClassType == ToolType.Dagger)
                 {
                     newTool = (MeleeWeapon)tempItem;
                 }
@@ -341,27 +583,23 @@ namespace SmithYourself
                     for (int i = 0; i < currentTool.attachments.Length; i++)
                     {
                         if (currentTool.attachments[i] != null)
-                        {
                             newTool.attachments[i] = currentTool.attachments[i];
-                        }
                     }
                 }
+
                 newTool.CopyEnchantments(currentTool, newTool);
 
-                if (newTool != null)
-                {
-                    Game1.player.removeItemFromInventory(currentItem);
-                    Game1.player.addItemToInventory(newTool);
-                    finalItem = newTool;
-                }
+                Game1.player.removeItemFromInventory(currentItem);
+                Game1.player.addItemToInventory(newTool);
+                finalItem = newTool;
             }
             else if (toolUpgradeData.ToolClassType == ToolType.Bag)
             {
                 Game1.player.MaxItems = toolUpgradeData.ToolLevel switch
                 {
-                    12 => Game1.player.MaxItems = 24,
-                    24 => Game1.player.MaxItems = 36,
-                    _ => Game1.player.MaxItems = Game1.player.MaxItems,
+                    12 => 24,
+                    24 => 36,
+                    _ => Game1.player.MaxItems
                 };
             }
             else if (toolUpgradeData.ToolClassType == ToolType.Trash)
@@ -374,102 +612,61 @@ namespace SmithYourself
             }
 
             if (toolUpgradeData.ToolClassType != ToolType.Trinket && !config.FreeToolsUpgrade)
-            {
                 RemoveMaterial(result);
-            }
             else if (toolUpgradeData.ToolClassType == ToolType.Trinket && !config.FreeTrinketsUpgrade)
-            {
                 RemoveMaterial(result);
-            }
 
             return finalItem;
         }
 
         public void RemoveMaterial(UpgradeResult result)
         {
-            int materialAmount = UpdateRequiredAmount(result);
+            if (!TryGetRequirements(toolUpgradeData.ToolClassType, toolUpgradeData.ToolLevel, out var reqs) || reqs.Count == 0)
+                return;
 
-            if (toolUpgradeData.ToolClassType != ToolType.Trinket && config.MinimumToolsUpgradeCost)
+            foreach (var req in reqs)
             {
-                materialAmount = 1;
-            }
-            else if (toolUpgradeData.ToolClassType == ToolType.Trinket && config.MinimumTrinketsUpgradeCost)
-            {
-                materialAmount = 1;
-            }
+                int baseAmount = ApplyMinimumCostRule(req.Amount);
+                int amountToRemove = ApplyResultScaling(baseAmount, result);
 
-            if (materialAmount > 0)
-            {
-                string requiredItemId = config.UpgradeItemsId[toolUpgradeData.ToolClassType][toolUpgradeData.ToolLevel];
-                Game1.player.removeFirstOfThisItemFromInventory(requiredItemId, materialAmount);
+                if (amountToRemove > 0)
+                    Game1.player.removeFirstOfThisItemFromInventory(req.ItemId, amountToRemove);
             }
         }
 
         public int CalculateAttemptScore(float powerMeter)
         {
             int relevantSkillLevel = GetRelevantSkillLevel(toolUpgradeData.ToolClassType);
-            float skillBonus = relevantSkillLevel * 0.5f; // Each skill level gives a 0.5% wider range
+            float skillBonus = relevantSkillLevel * 0.5f;
             float power = powerMeter * 100;
 
-
-            int score;
-
-            // Perfect: 99-100% (plus skill bonus)
             if (power >= 99 - skillBonus && power <= 100)
-            {
-                score = (int)UpgradeResult.Perfect;
-            }
-            // Critical: 75-94% (plus skill bonus)
-            else if (power >= 75 - skillBonus && power < 99 - skillBonus)
-            {
-                score = (int)UpgradeResult.Critical;
-            }
-            // Failed: Below 30% (if allowed)
-            else if (config.AllowFail && power <= config.FailPoint * 100)
-            {
-                score = (int)UpgradeResult.Failed;
-            }
-            // Normal: Everything else (30-74% plus skill bonus)
-            else
-            {
-                score = (int)UpgradeResult.Normal;
-            }
-            return score;
-        }
+                return (int)UpgradeResult.Perfect;
 
-        public int UpdateRequiredAmount(UpgradeResult minigameResult)
-        {
-            const float criticalReductionPercentage = 0.25f;
-            int material = config.UpgradeAmounts[toolUpgradeData.ToolClassType][toolUpgradeData.ToolLevel];
-            switch (minigameResult)
-            {
-                case UpgradeResult.Failed:
-                    return (int)(material * criticalReductionPercentage);
+            if (power >= 75 - skillBonus && power < 99 - skillBonus)
+                return (int)UpgradeResult.Critical;
 
-                case UpgradeResult.Critical:
-                    return material - (int)(material * criticalReductionPercentage);
-                case UpgradeResult.Normal:
-                default:
-                    return material;
-            }
+            if (config.AllowFail && power <= config.FailPoint * 100)
+                return (int)UpgradeResult.Failed;
+
+            return (int)UpgradeResult.Normal;
         }
 
         public int MaxRepeatAmount()
         {
             if (config.SimpleMinigame)
-            {
                 return 1;
-            }
-            else
-            {
-                return config.RepeatMinigameAmounts[toolUpgradeData.ToolClassType][toolUpgradeData.ToolLevel];
-            }
+
+            return config.RepeatMinigameAmounts[toolUpgradeData.ToolClassType][toolUpgradeData.ToolLevel];
         }
+
         private int GetItemIndexFromInventory(SObject material)
         {
             for (int i = 0; i < Game1.player.Items.Count; i++)
             {
-                if (Game1.player.Items[i] is SObject inventoryItem && inventoryItem.QualifiedItemId != null && inventoryItem.QualifiedItemId == material.QualifiedItemId)
+                if (Game1.player.Items[i] is SObject inventoryItem &&
+                    inventoryItem.QualifiedItemId != null &&
+                    inventoryItem.QualifiedItemId == material.QualifiedItemId)
                 {
                     return i;
                 }
@@ -479,21 +676,12 @@ namespace SmithYourself
 
         private string GetNextLevelId()
         {
-            int nextLevel;
-
-            if (toolUpgradeData.ToolClassType == ToolType.Pan)
-            {
-                nextLevel = toolUpgradeData.ToolLevel;
-            }
-            else
-            {
-                nextLevel = toolUpgradeData.ToolLevel + 1;
-            }
-
+            int nextLevel = toolUpgradeData.ToolClassType == ToolType.Pan
+                ? toolUpgradeData.ToolLevel
+                : toolUpgradeData.ToolLevel + 1;
 
             return config.ToolID[toolUpgradeData.ToolClassType][nextLevel];
         }
-
 
         public Trinket IncreaseTrinketStats(Trinket trinket)
         {
@@ -523,9 +711,8 @@ namespace SmithYourself
             do
             {
                 if (CheckMaxedStats(trinket, basicStatOne, advancedStatOne, advancedStatTwo))
-                {
                     return trinket;
-                }
+
                 int newSeed = Game1.random.Next();
                 trinket.RerollStats(newSeed);
                 currentStats = trinket.descriptionSubstitutionTemplates;
@@ -538,67 +725,61 @@ namespace SmithYourself
                         newBasicStatOne = int.Parse(currentStats[0]);
                         isImproved = newBasicStatOne > basicStatOne;
                         break;
+
                     case "IceRod":
                         newAdvancedStatOne = float.Parse(currentStats[0]);
                         newAdvancedStatTwo = float.Parse(currentStats[1]);
-                        isImproved = (newAdvancedStatOne <= advancedStatOne && newAdvancedStatTwo > advancedStatTwo) ||
-                        (newAdvancedStatOne < advancedStatOne && newAdvancedStatTwo >= advancedStatTwo);
-
+                        isImproved =
+                            (newAdvancedStatOne <= advancedStatOne && newAdvancedStatTwo > advancedStatTwo) ||
+                            (newAdvancedStatOne < advancedStatOne && newAdvancedStatTwo >= advancedStatTwo);
                         break;
+
                     case "MagicQuiver":
                         newAdvancedStatOne = float.Parse(currentStats[0]);
                         newAdvancedStatTwo = float.Parse(currentStats[1]);
-                        isImproved = CheckTrinketImprovementWithLimits(trinketName, trinket.DisplayName, advancedStatOne, newAdvancedStatOne, advancedStatTwo, newAdvancedStatTwo);
+                        isImproved = CheckTrinketImprovementWithLimits(
+                            trinketName, trinket.DisplayName,
+                            advancedStatOne, newAdvancedStatOne,
+                            advancedStatTwo, newAdvancedStatTwo);
                         break;
                 }
             } while (!isImproved);
+
             return trinket;
         }
 
-        public bool CheckTrinketImprovementWithLimits(string originalTrinketName, string currentTrinketName,
-                                                      float originalCooldown, float currentCooldown,
-                                                      float originalMinDamage, float currentMinDamage)
+        public bool CheckTrinketImprovementWithLimits(
+            string originalTrinketName, string currentTrinketName,
+            float originalCooldown, float currentCooldown,
+            float originalMinDamage, float currentMinDamage)
         {
             if (currentTrinketName == "Perfect Magic Quiver")
-            {
                 return true;
-            }
 
             if (originalTrinketName == "Magic Quiver")
             {
-                if (currentTrinketName == "Rapid Magic Quiver" || currentTrinketName == "Heavy Magic Quiver" || currentTrinketName == "Perfect Magic Quiver")
-                {
+                if (currentTrinketName == "Rapid Magic Quiver" ||
+                    currentTrinketName == "Heavy Magic Quiver" ||
+                    currentTrinketName == "Perfect Magic Quiver")
                     return true;
-                }
             }
 
             if (originalTrinketName == "Heavy Magic Quiver")
             {
                 if (currentTrinketName == "Rapid Magic Quiver" || currentTrinketName == "Magic Quiver")
-                {
                     return false;
-                }
             }
 
             if (originalTrinketName == "Rapid Magic Quiver")
             {
                 if (currentTrinketName == "Heavy Magic Quiver" || currentTrinketName == "Magic Quiver")
-                {
                     return false;
-                }
             }
 
-
-            if ((originalCooldown > currentCooldown && originalMinDamage <= currentMinDamage) || (originalCooldown >= currentCooldown && originalMinDamage < currentMinDamage))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return
+                (originalCooldown > currentCooldown && originalMinDamage <= currentMinDamage) ||
+                (originalCooldown >= currentCooldown && originalMinDamage < currentMinDamage);
         }
-
 
         private static bool CheckMaxedStats(Trinket trinket, int basicStatOne, float advancedStatOne, float advancedStatTwo)
         {
@@ -625,6 +806,10 @@ namespace SmithYourself
                 ToolType.WateringCan => Game1.player.FarmingLevel,
                 ToolType.Rod => Game1.player.FishingLevel,
                 ToolType.Trinket => Game1.player.CombatLevel,
+                ToolType.Sword => Game1.player.CombatLevel,
+                ToolType.Mace => Game1.player.CombatLevel,
+                ToolType.Dagger => Game1.player.CombatLevel,
+                ToolType.Boots => Game1.player.CombatLevel,
                 _ => Game1.player.Level
             };
         }
@@ -658,8 +843,6 @@ namespace SmithYourself
             }
         }
 
-        
-
         private static string ResolveItemName(string id)
         {
             try
@@ -668,98 +851,101 @@ namespace SmithYourself
                 if (item is not null)
                     return item.DisplayName ?? id;
             }
-            catch { /* ignore bad ids */ }
+            catch { }
             return id;
         }
+
+        void AddTierTokens(Dictionary<string, object> t, ToolType type, int levelKey, string tokenPrefix)
+        {
+            string amountKey = $"{tokenPrefix}_{levelKey}_amount";
+            string itemKey = $"{tokenPrefix}_{levelKey}_item";
+            string costKey = $"{tokenPrefix}_{levelKey}_cost";
+
+            if (!TryGetRequirements(type, levelKey, out var reqs) || reqs.Count == 0)
+            {
+                t[amountKey] = "";
+                t[itemKey] = "";
+                t[costKey] = "";
+                return;
+            }
+
+            var displayReqs = reqs
+                .Select(r => new MaterialRequirement
+                {
+                    ItemId = r.ItemId,
+                    Amount = ApplyMinimumCostRule(r.Amount)
+                })
+                .Where(r => r.Amount > 0)
+                .ToList();
+
+            if (displayReqs.Count == 0)
+            {
+                t[amountKey] = "";
+                t[itemKey] = "";
+                t[costKey] = "";
+                return;
+            }
+
+            if (displayReqs.Count == 1)
+            {
+                int amt = displayReqs[0].Amount;
+                string name = ResolveObjectName(displayReqs[0].ItemId);
+
+                t[amountKey] = amt;
+                t[itemKey] = name;
+
+                // Always-valid formatted version
+                t[costKey] = $"{amt} x {name}";
+            }
+            else
+            {
+                // Your existing formatter should output "20 × Iridium Bar + 3 × Prismatic Shard"
+                string formatted = FormatRequirements(displayReqs);
+
+                // Keep legacy tokens harmless
+                t[amountKey] = "";
+                t[itemKey] = formatted;
+
+                // Always-valid formatted version
+                t[costKey] = formatted;
+            }
+        }
+
+
         public void ShowManual()
         {
             ModEntry.isManualOpen = true;
-            var tokens = new Dictionary<string, object>
+
+            var tokens = new Dictionary<string, object>();
+
+            // Define once: which levels appear in the manual per type (and the token prefix used in i18n)
+            var manualLevels = new (ToolType Type, string Prefix, int[] Levels)[]
             {
-                // Axe
-                ["Axe_0_amount"] = config.UpgradeAmounts[ToolType.Axe][0],
-                ["Axe_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Axe][0]),
-                ["Axe_1_amount"] = config.UpgradeAmounts[ToolType.Axe][1],
-                ["Axe_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Axe][1]),
-                ["Axe_2_amount"] = config.UpgradeAmounts[ToolType.Axe][2],
-                ["Axe_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Axe][2]),
-                ["Axe_3_amount"] = config.UpgradeAmounts[ToolType.Axe][3],
-                ["Axe_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Axe][3]),
+                (ToolType.Axe,         "Axe",         new[] { 0, 1, 2, 3 }),
+                (ToolType.Pickaxe,     "Pickaxe",     new[] { 0, 1, 2, 3 }),
+                (ToolType.Hoe,         "Hoe",         new[] { 0, 1, 2, 3 }),
+                (ToolType.WateringCan, "WateringCan", new[] { 0, 1, 2, 3 }),
+                (ToolType.Trash,       "Trash",       new[] { 0, 1, 2, 3 }),
 
-                // Pickaxe
-                ["Pickaxe_0_amount"] = config.UpgradeAmounts[ToolType.Pickaxe][0],
-                ["Pickaxe_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pickaxe][0]),
-                ["Pickaxe_1_amount"] = config.UpgradeAmounts[ToolType.Pickaxe][1],
-                ["Pickaxe_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pickaxe][1]),
-                ["Pickaxe_2_amount"] = config.UpgradeAmounts[ToolType.Pickaxe][2],
-                ["Pickaxe_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pickaxe][2]),
-                ["Pickaxe_3_amount"] = config.UpgradeAmounts[ToolType.Pickaxe][3],
-                ["Pickaxe_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pickaxe][3]),
+                (ToolType.Pan,         "Pan",         new[] { 1, 2, 3 }),
+                (ToolType.Rod,         "Rod",         new[] { 0, 1, 2, 3 }),
+                (ToolType.Scythe,      "Scythe",      new[] { 0, 1 }),
+                (ToolType.Bag,         "Bag",         new[] { 12, 24 }),
 
-                // Hoe
-                ["Hoe_0_amount"] = config.UpgradeAmounts[ToolType.Hoe][0],
-                ["Hoe_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Hoe][0]),
-                ["Hoe_1_amount"] = config.UpgradeAmounts[ToolType.Hoe][1],
-                ["Hoe_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Hoe][1]),
-                ["Hoe_2_amount"] = config.UpgradeAmounts[ToolType.Hoe][2],
-                ["Hoe_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Hoe][2]),
-                ["Hoe_3_amount"] = config.UpgradeAmounts[ToolType.Hoe][3],
-                ["Hoe_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Hoe][3]),
+                (ToolType.Trinket,     "Trinket",     new[] { 0 }),
 
-                // Watering Can
-                ["WateringCan_0_amount"] = config.UpgradeAmounts[ToolType.WateringCan][0],
-                ["WateringCan_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.WateringCan][0]),
-                ["WateringCan_1_amount"] = config.UpgradeAmounts[ToolType.WateringCan][1],
-                ["WateringCan_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.WateringCan][1]),
-                ["WateringCan_2_amount"] = config.UpgradeAmounts[ToolType.WateringCan][2],
-                ["WateringCan_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.WateringCan][2]),
-                ["WateringCan_3_amount"] = config.UpgradeAmounts[ToolType.WateringCan][3],
-                ["WateringCan_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.WateringCan][3]),
-
-                // Trash Can
-                ["Trash_0_amount"] = config.UpgradeAmounts[ToolType.Trash][0],
-                ["Trash_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trash][0]),
-                ["Trash_1_amount"] = config.UpgradeAmounts[ToolType.Trash][1],
-                ["Trash_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trash][1]),
-                ["Trash_2_amount"] = config.UpgradeAmounts[ToolType.Trash][2],
-                ["Trash_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trash][2]),
-                ["Trash_3_amount"] = config.UpgradeAmounts[ToolType.Trash][3],
-                ["Trash_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trash][3]),
-
-                // Pan
-                ["Pan_1_amount"] = config.UpgradeAmounts[ToolType.Pan][1],
-                ["Pan_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pan][1]),
-                ["Pan_2_amount"] = config.UpgradeAmounts[ToolType.Pan][2],
-                ["Pan_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pan][2]),
-                ["Pan_3_amount"] = config.UpgradeAmounts[ToolType.Pan][3],
-                ["Pan_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Pan][3]),
-
-                // Rod
-                ["Rod_0_amount"] = config.UpgradeAmounts[ToolType.Rod][0],
-                ["Rod_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Rod][0]),
-                ["Rod_1_amount"] = config.UpgradeAmounts[ToolType.Rod][1],
-                ["Rod_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Rod][1]),
-                ["Rod_2_amount"] = config.UpgradeAmounts[ToolType.Rod][2],
-                ["Rod_2_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Rod][2]),
-                ["Rod_3_amount"] = config.UpgradeAmounts[ToolType.Rod][3],
-                ["Rod_3_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Rod][3]),
-
-                // Scythe
-                ["Scythe_0_amount"] = config.UpgradeAmounts[ToolType.Scythe][0],
-                ["Scythe_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Scythe][0]),
-                ["Scythe_1_amount"] = config.UpgradeAmounts[ToolType.Scythe][1],
-                ["Scythe_1_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Scythe][1]),
-
-                // Bag
-                ["Bag_12_amount"] = config.UpgradeAmounts[ToolType.Bag][12],
-                ["Bag_12_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Bag][12]),
-                ["Bag_24_amount"] = config.UpgradeAmounts[ToolType.Bag][24],
-                ["Bag_24_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Bag][24]),
-
-                // Trinket
-                ["Trinket_0_amount"] = config.UpgradeAmounts[ToolType.Trinket][0],
-                ["Trinket_0_item"] = ResolveItemName(config.UpgradeItemsId[ToolType.Trinket][0])
+                // New stuff
+                (ToolType.Boots,       "Boots",       new[] { 0, 1, 2, 3 }),
+                (ToolType.Sword,       "Sword",       new[] { 0, 1, 2, 3, 4 }),
+                (ToolType.Mace,        "Mace",        new[] { 0, 1, 2, 3, 4 }),
+                (ToolType.Dagger,      "Dagger",      new[] { 0, 1, 2, 3, 4 }),
             };
+
+            foreach (var (type, prefix, levels) in manualLevels)
+            {
+                foreach (int levelKey in levels)
+                    AddTierTokens(tokens, type, levelKey, prefix);
+            }
 
             string body = config.SkipTrainingRod
                 ? helper.Translation.Get("anvil.page.body.no-training-rod", tokens)
@@ -776,12 +962,12 @@ namespace SmithYourself
         }
     }
 
-
     internal class ToolUpgradeData
     {
         public ToolType ToolClassType { get; set; } = ToolType.Undefined;
         public int ToolLevel { get; set; } = -1;
     }
+
     internal enum UpgradeResult
     {
         Failed,

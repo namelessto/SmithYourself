@@ -1,104 +1,184 @@
-﻿using StardewModdingAPI;
+﻿using System;
+using StardewModdingAPI;
 
 namespace SmithYourself.mod_menu
 {
-    internal class MiniGameMenu
+    internal static class MiniGameMenu
     {
-        public static void MiniGamePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi configMenu)
+        public static void MiniGamePage(IModHelper helper, IManifest manifest, IGenericModConfigMenuApi menu)
         {
-            configMenu.AddPage(
-               mod: manifest,
-               pageId: "minigame",
-               () => helper.Translation.Get("menu.minigame-page")
-           );
+            string T(string key) => helper.Translation.Get(key);
 
-            configMenu.AddNumberOption(
+            menu.AddPage(
                 mod: manifest,
-                name: () => helper.Translation.Get("menu.minigame-speed"),
-                tooltip: () => helper.Translation.Get("menu.minigame-speed-tooltip"),
+                pageId: "minigame",
+                pageTitle: () => T("menu.minigame-page")
+            );
+
+            // ---- Minigame tuning ----
+            AddFloat(
+                menu, manifest,
+                name: () => T("menu.minigame-speed"),
+                tooltip: () => T("menu.minigame-speed-tooltip"),
                 getValue: () => ModEntry.Config.MinigameBarSpeed,
-                setValue: value => ModEntry.Config.MinigameBarSpeed = value,
-                min: 0.01f,
-                max: 0.25f,
-                formatValue: value => $"{Math.Round(value * 100)}",
-                interval: 0.01f
+                setValue: v => ModEntry.Config.MinigameBarSpeed = v,
+                min: 0.01f, max: 0.25f, interval: 0.01f,
+                formatValue: v => $"{Math.Round(v * 100)}"
             );
 
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.minigame-cooldown"),
-                tooltip: () => helper.Translation.Get("menu.minigame-cooldown-tooltip"),
+            AddFloat(
+                menu, manifest,
+                name: () => T("menu.minigame-cooldown"),
+                tooltip: () => T("menu.minigame-cooldown-tooltip"),
                 getValue: () => ModEntry.Config.MinigameCooldown,
-                setValue: value => ModEntry.Config.MinigameCooldown = value,
-                min: 0f,
-                max: 2f,
-                formatValue: value => $"{Math.Round(value * 10f)}",
-                interval: 0.1f
+                setValue: v => ModEntry.Config.MinigameCooldown = v,
+                min: 0f, max: 2f, interval: 0.1f,
+                formatValue: v => $"{Math.Round(v * 10f)}"
             );
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.minigame-hint-marker"),
-                tooltip: () => helper.Translation.Get("menu.minigame-hint-marker-tooltip"),
+            AddBool(
+                menu, manifest,
+                name: () => T("menu.minigame-hint-marker"),
+                tooltip: () => T("menu.minigame-hint-marker-tooltip"),
                 getValue: () => ModEntry.Config.AllowHintMarker,
-                setValue: value => ModEntry.Config.AllowHintMarker = value
+                setValue: v => ModEntry.Config.AllowHintMarker = v
             );
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.minigame-popup-text"),
-                tooltip: () => helper.Translation.Get("menu.minigame-popup-text-tooltip"),
+            AddBool(
+                menu, manifest,
+                name: () => T("menu.minigame-popup-text"),
+                tooltip: () => T("menu.minigame-popup-text-tooltip"),
                 getValue: () => ModEntry.Config.AllowPopupText,
-                setValue: value => ModEntry.Config.AllowPopupText = value
+                setValue: v => ModEntry.Config.AllowPopupText = v
             );
 
-            configMenu.AddBoolOption(
-                 mod: manifest,
-                 name: () => helper.Translation.Get("menu.allow-fail"),
-                 tooltip: () => helper.Translation.Get("menu.allow-fail-tooltip"),
-                 getValue: () => ModEntry.Config.AllowFail,
-                 setValue: value => ModEntry.Config.AllowFail = value
-             );
+            AddBool(
+                menu, manifest,
+                name: () => T("menu.allow-fail"),
+                tooltip: () => T("menu.allow-fail-tooltip"),
+                getValue: () => ModEntry.Config.AllowFail,
+                setValue: v => ModEntry.Config.AllowFail = v
+            );
 
-            configMenu.AddNumberOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.fail-point"),
+            AddFloat(
+                menu, manifest,
+                name: () => T("menu.fail-point"),
                 getValue: () => ModEntry.Config.FailPoint,
-                setValue: value => ModEntry.Config.FailPoint = value,
-                min: 0f,
-                max: 1f,
-                formatValue: value => $"{Math.Round(value * 100)}%",
-                interval: 0.01f
+                setValue: v => ModEntry.Config.FailPoint = v,
+                min: 0f, max: 1f, interval: 0.01f,
+                formatValue: v => $"{Math.Round(v * 100)}%"
             );
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.minimum-tools-upgrade-cost"),
-                tooltip: () => helper.Translation.Get("menu.minimum-tools-upgrade-cost-tooltip"),
+            // ---- Economy ----
+            MenuMaterialHelpers.AddSeparator(menu, manifest);
+
+            AddBool(
+                menu, manifest,
+                name: () => T("menu.minimum-tools-upgrade-cost"),
+                tooltip: () => T("menu.minimum-tools-upgrade-cost-tooltip"),
                 getValue: () => ModEntry.Config.MinimumToolsUpgradeCost,
-                setValue: value => ModEntry.Config.MinimumToolsUpgradeCost = value
+                setValue: v => ModEntry.Config.MinimumToolsUpgradeCost = v
             );
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.free-tools-upgrade"),
+            AddBool(
+                menu, manifest,
+                name: () => T("menu.free-tools-upgrade"),
                 getValue: () => ModEntry.Config.FreeToolsUpgrade,
-                setValue: value => ModEntry.Config.FreeToolsUpgrade = value
+                setValue: v => ModEntry.Config.FreeToolsUpgrade = v
             );
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.minimum-trinkets-upgrade-cost"),
-                tooltip: () => helper.Translation.Get("menu.minimum-trinkets-upgrade-cost-tooltip"),
+            AddBool(
+                menu, manifest,
+                name: () => T("menu.minimum-trinkets-upgrade-cost"),
+                tooltip: () => T("menu.minimum-trinkets-upgrade-cost-tooltip"),
                 getValue: () => ModEntry.Config.MinimumTrinketsUpgradeCost,
-                setValue: value => ModEntry.Config.MinimumTrinketsUpgradeCost = value
+                setValue: v => ModEntry.Config.MinimumTrinketsUpgradeCost = v
             );
 
-            configMenu.AddBoolOption(
-                mod: manifest,
-                name: () => helper.Translation.Get("menu.free-trinkets-upgrade"),
+            AddBool(
+                menu, manifest,
+                name: () => T("menu.free-trinkets-upgrade"),
                 getValue: () => ModEntry.Config.FreeTrinketsUpgrade,
-                setValue: value => ModEntry.Config.FreeTrinketsUpgrade = value
+                setValue: v => ModEntry.Config.FreeTrinketsUpgrade = v
+            );
+        }
+
+        private static void AddBool(
+            IGenericModConfigMenuApi menu,
+            IManifest manifest,
+            Func<string> name,
+            Func<bool> getValue,
+            Action<bool> setValue)
+        {
+            menu.AddBoolOption(
+                mod: manifest,
+                name: name,
+                getValue: getValue,
+                setValue: setValue
+            );
+        }
+
+        private static void AddBool(
+            IGenericModConfigMenuApi menu,
+            IManifest manifest,
+            Func<string> name,
+            Func<string> tooltip,
+            Func<bool> getValue,
+            Action<bool> setValue)
+        {
+            menu.AddBoolOption(
+                mod: manifest,
+                name: name,
+                tooltip: tooltip,
+                getValue: getValue,
+                setValue: setValue
+            );
+        }
+        private static void AddFloat(
+            IGenericModConfigMenuApi menu,
+            IManifest manifest,
+            Func<string> name,
+            Func<float> getValue,
+            Action<float> setValue,
+            float min,
+            float max,
+            float interval,
+            Func<float, string> formatValue)
+        {
+            menu.AddNumberOption(
+                mod: manifest,
+                name: name,
+                getValue: getValue,
+                setValue: setValue,
+                min: min,
+                max: max,
+                interval: interval,
+                formatValue: formatValue
+            );
+        }
+
+        private static void AddFloat(
+            IGenericModConfigMenuApi menu,
+            IManifest manifest,
+            Func<string> name,
+            Func<string> tooltip,
+            Func<float> getValue,
+            Action<float> setValue,
+            float min,
+            float max,
+            float interval,
+            Func<float, string> formatValue)
+        {
+            menu.AddNumberOption(
+                mod: manifest,
+                name: name,
+                tooltip: tooltip,
+                getValue: getValue,
+                setValue: setValue,
+                min: min,
+                max: max,
+                interval: interval,
+                formatValue: formatValue
             );
         }
     }
