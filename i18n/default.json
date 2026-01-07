@@ -2,7 +2,6 @@
   "anvil.display-name": "Smith's Anvil",
   "anvil.description": "A simple anvil.\nYou can upgrade your tools with it.",
   "anvil.mail": "This old anvil has been sitting around the guild for years, maybe you can smith yourself something with it. Check the manual I added if you're unsure how.^^-Marlon^P.S. Let's keep this between us.^^(activate the anvil without holding anything) %item id {{item}} 1 %%[#]Smith's Anvil",
-  "anvil.mail.boots.old": "I figured that rusty sword I gave you shouldn't be your only protection. I've included a pair of boots—nothing special, but they'll keep your feet intact.^^If you make it to the Adventurers’ Guild, I can help you get your hands on better gear.^-Marlon^ %item id {{boots}} 1 %%[#]Weathered Boots",
   "anvil.mail.boots": "I figured the rusty sword I gave you might not be enough once you go deeper into the mines, so here's a pair of boots as well.^^They're not much to look at, but they'll give you some extra protection and better grip. Don't be a hero—stay safe!^^-Marlon^^P.S. If you become a guild member, I'll show you the good stuff we keep in the shop. %item id {{boots}} 1 %%[#]Weathered Boots",
 
   "anvil.page.title": "Smithing Notes",
