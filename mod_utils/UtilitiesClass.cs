@@ -42,8 +42,7 @@ namespace SmithYourself
             return Game1.currentLocation?.getObjectAtTile((int)tile.X, (int)tile.Y);
         }
 
-        // NOTE: you said you'll rename later; kept as-is.
-        private string NormalizeBootId(string id)
+        private string NormalizeItemId(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return "";
@@ -56,8 +55,6 @@ namespace SmithYourself
             return $"{manifest.UniqueID}.{id}";
         }
 
-        // For ToolID chains (Sword/Mace/Dagger/Scythe) which can contain:
-        // "(W)0", "0", "YourModId.foo", "foo"
         private string ResolveWeaponQualifiedId(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -91,7 +88,6 @@ namespace SmithYourself
             if (!byLevel.TryGetValue(level, out var reqs) || reqs is null)
                 return false;
 
-            // Filter out "ghost" / default entries
             requirements = reqs
                 .Where(r => r is not null
                             && !string.IsNullOrWhiteSpace(r.ItemId)
@@ -166,7 +162,6 @@ namespace SmithYourself
             if (!config.ToolID.TryGetValue(ToolType.Boots, out var bootsChain) || bootsChain is null || bootsChain.Count == 0)
                 return false;
 
-            // Ensure material mapping exists (PlayerHasItem depends on it)
             if (!config.UpgradeMaterials.TryGetValue(ToolType.Boots, out var byLevel) || byLevel is null || byLevel.Count == 0)
                 return false;
 
@@ -175,7 +170,7 @@ namespace SmithYourself
             int currentLevel = -1;
             for (int i = 0; i < bootsChain.Count; i++)
             {
-                if (NormalizeBootId(bootsChain[i]) == itemId)
+                if (NormalizeItemId(bootsChain[i]) == itemId)
                 {
                     currentLevel = i;
                     break;
@@ -203,7 +198,7 @@ namespace SmithYourself
                 return currentItem;
 
             string newItemId = GetNextLevelId();
-            newItemId = NormalizeBootId(newItemId);
+            newItemId = NormalizeItemId(newItemId);
 
             var newItem = ItemRegistry.Create(newItemId, 1);
             Game1.player.removeItemFromInventory(currentItem);
@@ -324,7 +319,6 @@ namespace SmithYourself
 
             foreach (var toolTypeKey in config.ToolID.Keys)
             {
-                // Bag/Trash handled later
                 if (toolTypeKey == ToolType.Bag || toolTypeKey == ToolType.Trash)
                     continue;
 
@@ -336,7 +330,6 @@ namespace SmithYourself
                 bool isScythe = toolTypeKey == ToolType.Scythe;
                 bool isAnyWeaponType = isSwordMaceDagger || isScythe;
 
-                // Type gate
                 if (isAnyWeaponType)
                 {
                     if (currentItem is not MeleeWeapon)
@@ -555,9 +548,8 @@ namespace SmithYourself
                     toolUpgradeData.ToolClassType == ToolType.Mace ||
                     toolUpgradeData.ToolClassType == ToolType.Dagger)
                 {
-                    // Weapons are MeleeWeapon; IDs might be local mod ids, so normalize
                     currentTool = (MeleeWeapon)currentItem;
-                    newItemId = NormalizeBootId(newItemId);
+                    newItemId = NormalizeItemId(newItemId);
                 }
                 else
                 {
@@ -660,19 +652,6 @@ namespace SmithYourself
             return config.RepeatMinigameAmounts[toolUpgradeData.ToolClassType][toolUpgradeData.ToolLevel];
         }
 
-        private int GetItemIndexFromInventory(SObject material)
-        {
-            for (int i = 0; i < Game1.player.Items.Count; i++)
-            {
-                if (Game1.player.Items[i] is SObject inventoryItem &&
-                    inventoryItem.QualifiedItemId != null &&
-                    inventoryItem.QualifiedItemId == material.QualifiedItemId)
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
 
         private string GetNextLevelId()
         {

@@ -295,7 +295,7 @@ namespace SmithYourself
         public void afterSwingAnimation(Farmer who)
         {
             Game1.playSound("parry");
-            if (!ModEntry.isMinigameOpen)
+            if (shouldCloseMenu || !ModEntry.isMinigameOpen)
             {
                 who.toolOverrideFunction = null;
                 return;

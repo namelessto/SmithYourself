@@ -1,15 +1,13 @@
 namespace SmithYourself.mod_utils
 {
     internal record CustomWeaponDef(
-        string Id,            // internal item id (suffix, mod prefix added later)
-        int SpriteIndex,      // index in weapons.png
-        int Price,            // shop price
+        string Id,
+        int SpriteIndex,
+        int Price,
         int MinDamage,
         int MaxDamage,
-        int Type,             // 1=dagger, 2=club, 3=sword
-
-        // Optional combat modifiers (vanilla defaults shown)
-        int Speed = 0,        // attack speed modifier
+        int Type,             
+        int Speed = 0,
         int Precision = 0,
         int Defense = 0,
         float Knockback = 1f,
@@ -41,28 +39,26 @@ namespace SmithYourself.mod_utils
             new(Id: "steel_dagger",   SpriteIndex: 14,Price: 1, MinDamage: 6,  MaxDamage: 12, Type: 1, Speed: 2,  Precision: 0, Defense: 0, Knockback: 1f, CritChance: 0.12f, CritMultiplier: 3f, AreaOfEffect: 0),
             new(Id: "gold_dagger",    SpriteIndex: 15,Price: 1, MinDamage: 16, MaxDamage: 28, Type: 1, Speed: 3,  Precision: 0, Defense: 0, Knockback: 1f, CritChance: 0.14f, CritMultiplier: 3f, AreaOfEffect: 0),
             new(Id: "iridium_dagger", SpriteIndex: 16,Price: 1, MinDamage: 35, MaxDamage: 55, Type: 1, Speed: 4,  Precision: 0, Defense: 0, Knockback: 1f, CritChance: 0.2f, CritMultiplier: 3f, AreaOfEffect: 0),
-            new(Id: "cosmic_dagger",  SpriteIndex: 17,Price: 1, MinDamage: 60, MaxDamage: 80, Type: 1, Speed: 6, Precision: 0, Defense: 0, Knockback: 1f, CritChance: 0.4f, CritMultiplier: 3f, AreaOfEffect: 20),
+            new(Id: "cosmic_dagger",  SpriteIndex: 17,Price: 1, MinDamage: 60, MaxDamage: 80, Type: 1, Speed: 6, Precision: 0, Defense: 0, Knockback: 1f, CritChance: 0.4f, CritMultiplier: 3f, AreaOfEffect: 15),
         };
 
         internal record CustomBoot(
-            string Id,           // suffix id (mod prefix added later)
+            string Id,
             int Price,
-            int SpriteIndex,     // index in boots.png
-            int ColorIndex,      // row in boots_colors.png
-                                 // Vanilla-supported stats
+            int SpriteIndex,
+            int ColorIndex,
             int Defense = 0,
             int Immunity = 0,
-            // NOT written to Data/Boots
-            // Used later by buff logic
             int SpeedBuff = 0
         );
+        
         public static readonly CustomBoot[] CustomBoots =
         {
-            new(Id: "weathered_boots", Price: 200, SpriteIndex: 0, ColorIndex: 0, Defense: 2, SpeedBuff: 0),
+            new(Id: "weathered_boots", Price: 200, SpriteIndex: 0, ColorIndex: 0, Defense: 2, SpeedBuff: 1),
             new(Id: "copper_boots", Price: 400, SpriteIndex: 1, ColorIndex: 1, Defense: 3, SpeedBuff: 1),
-            new(Id: "steel_boots", Price: 600, SpriteIndex: 2, ColorIndex: 2, Defense: 5, Immunity: 2, SpeedBuff: 1),
-            new(Id: "gold_boots", Price: 800, SpriteIndex: 3, ColorIndex: 3, Defense: 5, Immunity: 5, SpeedBuff: 2),
-            new(Id: "iridium_boots", Price: 1200, SpriteIndex: 4, ColorIndex: 4, Defense: 8, Immunity: 8, SpeedBuff: 3),
+            new(Id: "steel_boots", Price: 600, SpriteIndex: 2, ColorIndex: 2, Defense: 4, Immunity: 2, SpeedBuff: 2),
+            new(Id: "gold_boots", Price: 800, SpriteIndex: 3, ColorIndex: 3, Defense: 5, Immunity: 4, SpeedBuff: 2),
+            new(Id: "iridium_boots", Price: 1200, SpriteIndex: 4, ColorIndex: 4, Defense: 7, Immunity: 7, SpeedBuff: 3),
         };
     }
 }

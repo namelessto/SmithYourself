@@ -138,7 +138,7 @@
                     { 4, new()
                         {
                             new() { ItemId = "337", Amount = 20 },
-                            new() { ItemId = "896", Amount = 3 }
+                            new() { ItemId = "578", Amount = 20 }
                         }
                     },
                 }
@@ -152,7 +152,7 @@
                     { 4, new()
                         {
                             new() { ItemId = "337", Amount = 20 },
-                            new() { ItemId = "896", Amount = 3 }
+                            new() { ItemId = "578", Amount = 20 }
                         }
                     },
                 }
@@ -166,7 +166,7 @@
                     { 4, new()
                         {
                             new() { ItemId = "337", Amount = 20 },
-                            new() { ItemId = "896", Amount = 3 }
+                            new() { ItemId = "578", Amount = 10 }
                         }
                     },
                 }
@@ -278,7 +278,7 @@
             { ToolType.Mace,        new() { "rusty_mace", "copper_mace", "steel_mace", "gold_mace", "iridium_mace", "cosmic_mace" } },
             { ToolType.Dagger,      new() { "rusty_dagger", "copper_dagger", "steel_dagger", "gold_dagger", "iridium_dagger", "cosmic_dagger" } },
 
-            { ToolType.Boots,       new() { "Weathered_boots", "copper_boots", "steel_boots", "gold_boots", "iridium_boots" } },
+            { ToolType.Boots,       new() { "weathered_boots", "copper_boots", "steel_boots", "gold_boots", "iridium_boots" } },
         };
     }
 

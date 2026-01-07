@@ -74,15 +74,12 @@ namespace SmithYourself
             Farmer player = Game1.player;
             string bootsMailId = Assets.GetBootsMailId(ModManifest);
 
-            // HARD guard: already received or queued
             if (player.hasOrWillReceiveMail(bootsMailId))
                 return;
 
-            // Only trigger when the Rusty Sword is actually added
             if (!e.Added.Any(IsRustySword))
                 return;
 
-            // Queue mail for next day (safe)
             player.mailForTomorrow.Add(bootsMailId);
         }
 
@@ -98,7 +95,6 @@ namespace SmithYourself
 
             string anvilMailId = Assets.GetAnvilMailId(ModManifest);
 
-            // 2) Anvil mail: after finishing "Initiation" (i.e., after joining the guild)
             if (!player.hasOrWillReceiveMail(anvilMailId)
                 && player.hasOrWillReceiveMail("guildMember"))
             {
@@ -112,7 +108,9 @@ namespace SmithYourself
                 return;
 
             string? bootsId = Game1.player.boots.Value?.ItemId;
-            if (bootsId == lastBootsId)
+            bool buffMissing = !Game1.player.buffs.AppliedBuffs.ContainsKey(BuffId);
+
+            if (bootsId == lastBootsId && !buffMissing)
                 return;
 
             lastBootsId = bootsId;
@@ -130,7 +128,7 @@ namespace SmithYourself
             Game1.player.applyBuff(new Buff(
                 id: BuffId,
                 displayName: "Boot Speed",
-                displaySource: boots.displayName,
+                displaySource: boots.DisplayName,
                 duration: Buff.ENDLESS,
                 effects: new BuffEffects { Speed = { speed } }
             )
