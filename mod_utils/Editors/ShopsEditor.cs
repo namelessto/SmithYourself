@@ -41,8 +41,7 @@ namespace SmithYourself.mod_utils.Editors
                     Id = Assets.GetRustyMaceId(manifest),
                     ItemId = $"(W){Assets.GetRustyMaceId(manifest)}",
                     Price = 100,
-                    AvailableStock = GuildShopStock,
-                    AvailableStockLimit = LimitedStockMode.Global
+                    AvailableStockLimit = LimitedStockMode.None
                 });
 
                 guild.Items.Add(new ShopItemData
@@ -50,8 +49,7 @@ namespace SmithYourself.mod_utils.Editors
                     Id = Assets.GetRustyDaggerId(manifest),
                     ItemId = $"(W){Assets.GetRustyDaggerId(manifest)}",
                     Price = 100,
-                    AvailableStock = GuildShopStock,
-                    AvailableStockLimit = LimitedStockMode.Global
+                    AvailableStockLimit = LimitedStockMode.None
                 });
 
                 guild.Items.Add(new ShopItemData
@@ -59,8 +57,7 @@ namespace SmithYourself.mod_utils.Editors
                     Id = Assets.GetLeatherBootsId(manifest),
                     ItemId = $"(B){Assets.GetLeatherBootsId(manifest)}",
                     Price = 300,
-                    AvailableStock = GuildShopStock,
-                    AvailableStockLimit = LimitedStockMode.Global
+                    AvailableStockLimit = LimitedStockMode.None
                 });
             });
         }
