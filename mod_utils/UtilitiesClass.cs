@@ -461,7 +461,7 @@ namespace SmithYourself
             int maxLevel = config.UpgradeMaterials[toolClassType].Count;
             maxLevel = toolClassType switch
             {
-                ToolType.Pan => maxLevel + 2,
+                ToolType.Pan => maxLevel + 1,
                 ToolType.Bag => (maxLevel + 1) * 12,
                 _ => maxLevel
             };
