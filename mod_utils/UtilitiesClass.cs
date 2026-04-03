@@ -363,7 +363,7 @@ namespace SmithYourself
 
                 toolUpgradeData.ToolClassType = toolTypeKey;
 
-                if (isAnyWeaponType)
+                if (isAnyWeaponType && toolTypeKey != ToolType.Scythe)
                 {
                     string currentWeaponQid = currentItem.QualifiedItemId;
 
@@ -543,8 +543,7 @@ namespace SmithYourself
             {
                 string newItemId = GetNextLevelId();
 
-                if (toolUpgradeData.ToolClassType == ToolType.Scythe ||
-                    toolUpgradeData.ToolClassType == ToolType.Sword ||
+                if (toolUpgradeData.ToolClassType == ToolType.Sword ||
                     toolUpgradeData.ToolClassType == ToolType.Mace ||
                     toolUpgradeData.ToolClassType == ToolType.Dagger)
                 {
