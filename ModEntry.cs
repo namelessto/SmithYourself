@@ -1,3 +1,4 @@
+using HarmonyLib;
 using SmithYourself.Config;
 using SmithYourself.Content;
 using SmithYourself.Core;
@@ -31,6 +32,8 @@ namespace SmithYourself
         {
             _config         = Helper.ReadConfig<ModConfig>() ?? new ModConfig();
             _upgradeService = new AnvilUpgradeService(helper, Monitor, _config, ModManifest);
+
+            ScytheRecoveryPatch.Apply(new Harmony(ModManifest.UniqueID));
             _trinketService = new TrinketService(helper, _config);
             _geodeService   = new GeodeService(helper, _config);
             _init           = new Initialization(Helper, Monitor, _config, Helper.Translation, ModManifest);
