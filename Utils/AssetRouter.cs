@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 
-namespace SmithYourself.mod_utils
+namespace SmithYourself.Utils
 {
     internal sealed class AssetRouter
     {

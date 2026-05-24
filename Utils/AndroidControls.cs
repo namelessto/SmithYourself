@@ -1,29 +1,24 @@
-﻿using Microsoft.Xna.Framework;              // Vector2, Rectangle, Point
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using SObject = StardewValley.Object;
 
-namespace SmithYourself.mod_utils
+namespace SmithYourself.Utils
 {
     internal static class AndroidControls
     {
-        // --- double-tap tracking ---
         private static double _lastTapMs = -1;
         private static Vector2 _lastTapAbs = Vector2.Zero;
 
-        // --- deferred single-tap state (no UpdateTicked; use DelayedAction) ---
         private static bool _pending;
         private static double _pendingAtMs;
         private static SObject? _pendingAnvil;
         private static Action<SObject>? _pendingCallback;
-        private static int _pendingToken;          // increments to cancel older callbacks
+        private static int _pendingToken;
 
         private const double SingleTapDelayMs = 250;
 
-
-
-        // ---------- public API ----------
         /// <summary>
         /// Handles Android input. Returns true if handled (suppressed or interacted).
         /// - Single tap: defers interaction briefly (to allow double-tap).
@@ -31,14 +26,14 @@ namespace SmithYourself.mod_utils
         /// - Controller A: immediate interaction (callback invoked).
         /// </summary>
         public static bool TryHandle(
-    ButtonPressedEventArgs e,
-    string bigCraftableId,
-    IModHelper helper,
-    bool requireProximity,
-    int proximityRadiusTiles,
-    Action<SObject> interactCallback,   // ModEntry handler (e.g., InteractWithAnvil)
-    out SObject? anvil                  // set only for immediate ControllerA path
-)
+            ButtonPressedEventArgs e,
+            string bigCraftableId,
+            IModHelper helper,
+            bool requireProximity,
+            int proximityRadiusTiles,
+            Action<SObject> interactCallback,
+            out SObject? anvil
+        )
         {
             anvil = null;
 
@@ -46,13 +41,11 @@ namespace SmithYourself.mod_utils
             bool isActionButton = e.Button.IsActionButton() || e.Button == SButton.ControllerA;
             bool isToolButton = e.Button == SButton.ControllerX || e.Button == SButton.RightTrigger || e.Button == SButton.RightShoulder;
 
-            // Let controller tool buttons pass through → vanilla swing (pickup)
             if (isToolButton)
                 return false;
 
             if (isTouch)
             {
-                // WORLD pixels (screen + viewport)
                 var scr = e.Cursor.ScreenPixels;
                 var abs = new Vector2(scr.X + Game1.viewport.X, scr.Y + Game1.viewport.Y);
 
@@ -61,7 +54,6 @@ namespace SmithYourself.mod_utils
                 _lastTapMs = nowMs;
                 _lastTapAbs = abs;
 
-                // Hit-test anvil
                 int tx = (int)(abs.X / Game1.tileSize);
                 int ty = (int)(abs.Y / Game1.tileSize);
                 var tapTile = new Vector2(tx, ty);
@@ -72,34 +64,29 @@ namespace SmithYourself.mod_utils
                 if (requireProximity && !IsNearPlayer(placed, proximityRadiusTiles))
                     return false;
 
-                // Double-tap + break tool → cancel any pending single tap, let vanilla swing to pickup
                 if (dbl)
                 {
                     _pending = false;
                     _pendingAnvil = null;
                     _pendingCallback = null;
-                    _pendingToken++; // invalidate any scheduled callbacks
-                    return false;    // DO NOT suppress → vanilla swing happens
+                    _pendingToken++;
+                    return false;
                 }
 
-                // Single tap: schedule a deferred interaction; if a second tap comes, we’ll cancel via token
                 _pending = true;
                 _pendingAtMs = nowMs;
                 _pendingAnvil = placed;
                 _pendingCallback = interactCallback;
                 int myToken = ++_pendingToken;
 
-                // Suppress THIS tap so it doesn’t swing now
                 helper.Input.Suppress(e.Button);
                 helper.Input.Suppress(SButton.MouseLeft);
                 helper.Input.Suppress(SButton.ControllerA);
                 Game1.player.Halt();
                 Game1.player.UsingTool = false;
 
-                // Defer single-tap interaction slightly without UpdateTicked
                 DelayedAction.functionAfterDelay(() =>
                 {
-                    // Only fire if still pending and token matches (i.e., no double-tap canceled it)
                     if (_pending && myToken == _pendingToken && _pendingAnvil != null && _pendingCallback != null)
                     {
                         var anvilToUse = _pendingAnvil;
@@ -109,16 +96,15 @@ namespace SmithYourself.mod_utils
                         _pendingAnvil = null;
                         _pendingCallback = null;
 
-                        cb(anvilToUse!); // perform interaction now
+                        cb(anvilToUse!);
                     }
                 }, (int)SingleTapDelayMs);
 
-                return true; // handled (scheduled)
+                return true;
             }
 
             if (isActionButton)
             {
-                // Resolve near grab tile (tiny tolerance) and interact immediately
                 var center = Game1.player.GetGrabTile();
                 SObject? placed = null;
 
@@ -156,16 +142,12 @@ namespace SmithYourself.mod_utils
                 Game1.player.Halt();
 
                 anvil = placed;
-                interactCallback(placed); // immediate interaction
+                interactCallback(placed);
                 return true;
             }
 
             return false;
         }
-
-
-        // ---------- helpers ----------
-
 
         private static bool IsDoubleTap(Vector2 absNow, double nowMs, double maxMs = 300, float maxDistPx = 70f)
         {
@@ -173,7 +155,6 @@ namespace SmithYourself.mod_utils
             return (nowMs - _lastTapMs) <= maxMs && Vector2.Distance(absNow, _lastTapAbs) <= maxDistPx;
         }
 
-        // stable proximity using player bbox center → tile coords
         private static bool IsNearPlayer(SObject obj, int radiusTiles)
         {
             var center = Game1.player.GetBoundingBox().Center;
@@ -212,7 +193,7 @@ namespace SmithYourself.mod_utils
                     int baseY = (int)((so.TileLocation.Y - (tilesHigh - 1)) * Game1.tileSize);
                     var drawRect = new Rectangle(baseX, baseY, tilesWide * Game1.tileSize, tilesHigh * Game1.tileSize);
 
-                    if (drawRect.Contains(new Point((int)abs.X, (int)abs.Y)))
+                    if (drawRect.Contains(new Microsoft.Xna.Framework.Point((int)abs.X, (int)abs.Y)))
                         return so;
                 }
             }

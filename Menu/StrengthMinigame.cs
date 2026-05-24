@@ -1,68 +1,75 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using SmithYourself.Config;
+using SmithYourself.Core;
+using SmithYourself.Utils;
 using StardewValley;
 using StardewValley.Menus;
 
-namespace SmithYourself
+namespace SmithYourself.Menu
 {
     internal class StrengthMinigame : IClickableMenu
     {
-        private readonly UtilitiesClass UtilsClass;
+        private readonly MinigameSession _session;
+        private readonly ModConfig _config;
+        private readonly PopupText? _popups;
         private readonly Texture2D barBackground;
+
         private Vector2 barPosition;
         private Vector2 objectWorldPosition;
         private Vector2 _anvilTile;
-        private const float OscillationPeriod = 2.5f; // Base time for one complete oscillation
+
+        private const float OscillationPeriod = 2.5f;
         private readonly float maxPower = 1f;
         private readonly float minPower = 0f;
-        private const int MaxHoldFrames = 6;      // 6 frames ≈ 0.1s at 60fps
-        private const int MinHoldFrames = 4;       // 4 frames ≈ 0.07s at 60fps
-        private const int StartupDelay = 10;       // Delay before accepting input (10 frames ≈ 0.17s at 60fps)
+        private const int MaxHoldFrames = 6;
+        private const int MinHoldFrames = 4;
+        private const int StartupDelay = 10;
+
         private bool shouldCloseMenu = false;
+        private bool _closed = false;
         private bool isReadyForInput = false;
         private bool isProcessingAttempt = false;
-        private bool isInCooldown = false;      // true when bar is in cooldown after a hit
+        private bool isInCooldown = false;
         private bool isIncreasing;
-        private float lastHitPower = -1f; // stores the normalized (0-1) power value of the last hit; -1 means none
+
+        private float lastHitPower = -1f;
         private float powerMeter;
         private float cooldownDropSpeed;
         private float oscillationTime;
+        private float _hardSpeedBonus = 0f;
+
         private int startupFrames = 0;
         private int holdFrames = 0;
         private int maxRepeatAmount;
         private int currentRepeatAmount = 0;
         private int minigameScore = 0;
         private int toolIndex = 0;
-        private int lastHitMarkerPixels = -1; // stored pixel height from bottom of the bar (scaled) for a fixed marker
-                                              // StrengthMinigame.cs – add after the field declarations
-        private AnvilAction anvilAction = AnvilAction.None;
-        public StrengthMinigame(UtilitiesClass utilsClassInstance, Texture2D barBackgroundImage, AnvilAction action) : base(0, 0, 0, 0)
+        private int lastHitMarkerPixels = -1;
+
+        public StrengthMinigame(MinigameSession session, ModConfig config, Texture2D barBackgroundImage, PopupText? popups = null)
+            : base(0, 0, 0, 0)
         {
-            UtilsClass = utilsClassInstance;
-            powerMeter = 0f;
+            _session        = session;
+            _config         = config;
+            _popups         = popups;
+            barBackground   = barBackgroundImage;
+            maxRepeatAmount = session.MaxRepeat;
+            cooldownDropSpeed = config.MinigameCooldown;
+
+            powerMeter      = 0f;
             oscillationTime = 0f;
-            isIncreasing = true;
-            barBackground = barBackgroundImage;
-            maxRepeatAmount = UtilsClass.MaxRepeatAmount();
-            ModEntry.isMinigameOpen = true;
+            isIncreasing    = true;
             isReadyForInput = false;
             isProcessingAttempt = false;
-            startupFrames = 0;
-            isInCooldown = false;
-            cooldownDropSpeed = ModEntry.Config.MinigameCooldown;
-            anvilAction = action;
+            startupFrames   = 0;
+            isInCooldown    = false;
         }
 
         public void GetObjectPosition(Vector2 objectTilePosition, Vector2 playerWorldPosition)
         {
-
             _anvilTile = objectTilePosition;
-
-            objectWorldPosition = new(
-                objectTilePosition.X * Game1.tileSize,
-                objectTilePosition.Y * Game1.tileSize
-            );
 
             objectWorldPosition = new(
                 objectTilePosition.X * Game1.tileSize,
@@ -72,7 +79,6 @@ namespace SmithYourself
             float horizontalOffset = objectWorldPosition.X > playerWorldPosition.X
                 ? 1.1f * Game1.tileSize
                 : -1.1f * Game1.tileSize;
-
 
             barPosition = new Vector2(
                 objectWorldPosition.X + horizontalOffset - Game1.viewport.X,
@@ -84,18 +90,15 @@ namespace SmithYourself
         private static Color GetBarColor(float t)
         {
             t = MathHelper.Clamp(t, 0f, 1f);
-
             Color green = new Color(0, 255, 0);
 
             if (t >= 0.5f)
             {
-                // Lerp from yellow to green in good/critical/perfect zone (0.5-1.0)
                 float factor = (t - 0.5f) / 0.5f;
                 return Color.Lerp(Color.Yellow, green, factor);
             }
             else
             {
-                // Lerp from red to yellow in poor zone (0-0.5)
                 float factor = t / 0.5f;
                 return Color.Lerp(Color.Red, Color.Yellow, factor);
             }
@@ -114,21 +117,9 @@ namespace SmithYourself
 
             Color barColor = GetBarColor(powerMeter);
             if (isInCooldown)
-            {
                 barColor = Color.Lerp(Color.Gray, barColor, 0f);
-            }
 
-            b.Draw(
-                barBackground,
-                barPosition,
-                null,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                scale,
-                SpriteEffects.None,
-                0f
-            );
+            b.Draw(barBackground, barPosition, null, Color.White, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 
             b.Draw(
                 Game1.staminaRect,
@@ -146,7 +137,7 @@ namespace SmithYourself
                 1f
             );
 
-            if (ModEntry.Config.AllowHintMarker && lastHitMarkerPixels >= 0)
+            if (_config.AllowHintMarker && lastHitMarkerPixels >= 0)
             {
                 int markerHeight = Math.Max(1, 1 * Game1.pixelZoom);
                 int markerX = (int)(barPosition.X + (backgroundWidth - barWidth) / 2 * scale);
@@ -173,9 +164,7 @@ namespace SmithYourself
                 b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
             }
             if (Game1.player.FarmerSprite.isOnToolAnimation())
-            {
-                Game1.drawTool(Game1.player, toolIndex);
-            }
+                DrawPickaxeOverlay(b);
             if (Game1.IsRenderingNonNativeUIScale())
             {
                 b.End();
@@ -192,30 +181,29 @@ namespace SmithYourself
             {
                 if (!Game1.player.FarmerSprite.isOnToolAnimation() && !isProcessingAttempt)
                 {
-                    ModEntry.isMinigameOpen = false;
+                    if (!_closed)
+                    {
+                        _closed = true;
+                        _session.OnClosed();
+                    }
                     Game1.exitActiveMenu();
                     shouldCloseMenu = false;
                 }
                 return;
             }
 
-            // Handle startup delay
             if (!isReadyForInput && startupFrames < StartupDelay)
             {
                 startupFrames++;
                 if (startupFrames >= StartupDelay)
-                {
                     isReadyForInput = true;
-                }
             }
-
 
             if (isInCooldown)
             {
                 float dropAmount = cooldownDropSpeed * (float)time.ElapsedGameTime.TotalSeconds;
                 powerMeter = Math.Max(0f, powerMeter - dropAmount);
 
-                // stop oscillation updates while cooling down
                 if (powerMeter <= 0f)
                 {
                     isInCooldown = false;
@@ -228,28 +216,22 @@ namespace SmithYourself
 
             if (holdFrames > 0)
             {
-                holdFrames--; // 
+                holdFrames--;
                 return;
             }
 
-            // Update oscillation time based on speed setting
-            float speedMultiplier = MathHelper.Lerp(0.2f, 2f, ModEntry.Config.MinigameBarSpeed * 10f);
+            float speedMultiplier = MathHelper.Lerp(0.2f, 2f, _config.MinigameBarSpeed * 10f) + _hardSpeedBonus;
             oscillationTime += (float)time.ElapsedGameTime.TotalSeconds * speedMultiplier;
 
             if (holdFrames == 0)
             {
-                // Calculate power using a sine wave for smooth oscillation
-                // Use sine wave offset to ensure we start at 0 and reach 1
                 float normalizedTime = oscillationTime % OscillationPeriod / OscillationPeriod;
-                // Shift the sine wave by -π/2 so it starts at 0
                 double shiftedSine = Math.Sin((normalizedTime * Math.PI * 2) - Math.PI / 2);
-                powerMeter = (float)((shiftedSine + 1) / 2);  // Convert from -1,1 to 0,1 range
+                powerMeter = (float)((shiftedSine + 1) / 2);
 
-                // Ensure we exactly hit 0 and 1 at the extremes
                 if (Math.Abs(powerMeter) < 0.001f) powerMeter = 0f;
                 if (Math.Abs(powerMeter - 1f) < 0.001f) powerMeter = 1f;
 
-                // Check for direction changes
                 if (isIncreasing && powerMeter >= maxPower)
                 {
                     isIncreasing = false;
@@ -262,18 +244,17 @@ namespace SmithYourself
                 }
             }
 
-
             base.update(time);
         }
 
         public override void receiveKeyPress(Keys key)
         {
-            if (ModEntry.isMinigameOpen)
+            if (!_closed)
             {
                 if (Game1.options.doesInputListContain(Game1.options.menuButton, key) && readyToClose())
                 {
-
-                    ModEntry.isMinigameOpen = false;
+                    _closed = true;
+                    _session.OnClosed();
                     exitThisMenu();
                     return;
                 }
@@ -295,7 +276,7 @@ namespace SmithYourself
         public void afterSwingAnimation(Farmer who)
         {
             Game1.playSound("parry");
-            if (shouldCloseMenu || !ModEntry.isMinigameOpen)
+            if (shouldCloseMenu || _closed)
             {
                 who.toolOverrideFunction = null;
                 return;
@@ -304,20 +285,11 @@ namespace SmithYourself
 
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
-            if (isInCooldown)
-            {
+            if (isInCooldown || !isReadyForInput || isProcessingAttempt || shouldCloseMenu)
                 return;
-            }
-
-            if (!isReadyForInput || isProcessingAttempt || shouldCloseMenu)
-            {
-                return;
-            }
 
             if (currentRepeatAmount >= maxRepeatAmount)
-            {
                 return;
-            }
 
             int[] toolIndexes = { 109, 107, 108, 107 };
 
@@ -328,34 +300,37 @@ namespace SmithYourself
             PlayDirectionAnimation(Game1.player.FacingDirection);
             toolIndex = toolIndexes[Game1.player.FacingDirection];
             isProcessingAttempt = true;
+
             if (currentRepeatAmount < maxRepeatAmount)
             {
-                int attempt_score = UtilsClass.CalculateAttemptScore(powerMeter);
+                int attempt_score = _session.ScoreAttempt(powerMeter);
                 minigameScore += attempt_score;
+
                 string popupText = attempt_score switch
                 {
-                    (int)UpgradeResult.Perfect => "=Perfect=",
+                    (int)UpgradeResult.Perfect  => "=Perfect=",
                     (int)UpgradeResult.Critical => "Great",
-                    (int)UpgradeResult.Normal => "Good",
-                    _ => "Miss"
+                    (int)UpgradeResult.Normal   => "Good",
+                    _                           => "Miss"
                 };
 
                 Color popupTextColor = attempt_score switch
                 {
-                    (int)UpgradeResult.Perfect => Utility.GetPrismaticColor(speedMultiplier: 20),
+                    (int)UpgradeResult.Perfect  => Utility.GetPrismaticColor(speedMultiplier: 20),
                     (int)UpgradeResult.Critical => Color.MediumPurple,
-                    (int)UpgradeResult.Normal => Color.White,
-                    _ => Color.Red
+                    (int)UpgradeResult.Normal   => Color.White,
+                    _                           => Color.Red
                 };
 
-                if (ModEntry.Config.AllowPopupText)
-                {
-                    ModEntry.Popups?.SpawnAtTile(Game1.currentLocation, _anvilTile, popupText, popupTextColor, true, 0.5f);
-                }
+                if (_config.AllowPopupText)
+                    _popups?.SpawnAtTile(Game1.currentLocation, _anvilTile, popupText, popupTextColor, true, 0.5f);
 
                 lastHitPower = powerMeter;
                 currentRepeatAmount++;
                 isInCooldown = cooldownDropSpeed > 0f;
+
+                if (_config.MinigameDifficulty == "Hard")
+                    _hardSpeedBonus += _config.HardMinigameSpeedIncrement;
 
                 try
                 {
@@ -374,23 +349,17 @@ namespace SmithYourself
 
             if (currentRepeatAmount >= maxRepeatAmount)
             {
-                if (!shouldCloseMenu)  // Only process the result once
+                if (!shouldCloseMenu)
                 {
-                    UpgradeResult result = DetermineUpgradeResult(minigameScore, maxRepeatAmount);
-                    if (result != UpgradeResult.Failed && (anvilAction == AnvilAction.UpgradeTool || anvilAction == AnvilAction.UpgradeTrinket))
-                        newItem = UtilsClass.UpgradeTool(currentItem, result);
-                    else if (result != UpgradeResult.Failed && anvilAction == AnvilAction.UpgradeBoots)
-                        newItem = UtilsClass.UpgradeBoots(currentItem, result);
-                    else
-                        UtilsClass.RemoveMaterial(result);
-
-                    if (newItem != currentItem)
+                    try
                     {
-                        UtilsClass.ShowResult(result, newItem);
+                        UpgradeResult result = DetermineUpgradeResult(minigameScore, maxRepeatAmount);
+                        newItem = _session.Apply(currentItem, result);
+                        _session.ShowResult(result, newItem);
                     }
-                    else
+                    catch
                     {
-                        UtilsClass.ShowResult(result, currentItem);
+                        Game1.addHUDMessage(new HUDMessage("SmithYourself: upgrade failed — see SMAPI log", HUDMessage.error_type));
                     }
                     shouldCloseMenu = true;
                 }
@@ -408,13 +377,65 @@ namespace SmithYourself
                 return UpgradeResult.Failed;
         }
 
+        private void DrawPickaxeOverlay(SpriteBatch b)
+        {
+            int anim  = Game1.player.FarmerSprite.currentAnimationIndex;
+            int dir   = Game1.player.FacingDirection;
+            Vector2 pos = Game1.player.getLocalPosition(Game1.viewport) + Game1.player.jitter + Game1.player.armOffset;
+            float y   = Game1.player.yJumpOffset;
+            float lay = Game1.player.getDrawLayer() + 0.0005f;
+            Texture2D sheet = Game1.toolSpriteSheet;
+            Rectangle src = new(toolIndex * 16 % sheet.Width, toolIndex * 16 / sheet.Width * 16, 16, 32);
+
+            switch (dir)
+            {
+                case 1: // right
+                    switch (anim)
+                    {
+                        case 0: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X - 36f, pos.Y - 104f + y)), src, Color.White, -(float)Math.PI / 12f,      new Vector2(0f, 16f),  4f, SpriteEffects.None, lay); break;
+                        case 1: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X +  8f, pos.Y -  60f + y)), src, Color.White,  (float)Math.PI / 12f,      new Vector2(0f, 32f),  4f, SpriteEffects.None, lay); break;
+                        case 2: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X + 28f, pos.Y -  68f + y)), src, Color.White,  (float)Math.PI / 4f,       new Vector2(0f, 32f),  4f, SpriteEffects.None, lay); break;
+                        case 3: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X + 60f, pos.Y -  64f + y)), src, Color.White,  (float)Math.PI * 7f / 12f, new Vector2(0f, 32f),  4f, SpriteEffects.None, lay); break;
+                        case 4: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X + 60f, pos.Y -  60f + y)), src, Color.White,  (float)Math.PI * 7f / 12f, new Vector2(0f, 32f),  4f, SpriteEffects.None, lay); break;
+                        case 5: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X + 76f, pos.Y +  32f + y)), src, Color.White,  (float)Math.PI / 4f,       new Vector2(0f, 32f),  4f, SpriteEffects.None, lay); break;
+                        case 6: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X + 50f, pos.Y +  88f + y)), src, Color.White,  0f,                        new Vector2(0f, 128f), 4f, SpriteEffects.None, lay); break;
+                    }
+                    break;
+                case 3: // left
+                    switch (anim)
+                    {
+                        case 0: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X + 40f, pos.Y - 120f + y)), src, Color.White,  (float)Math.PI / 12f,      new Vector2(0f, 16f), 4f, SpriteEffects.FlipHorizontally, lay); break;
+                        case 1: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X - 16f, pos.Y - 112f + y)), src, Color.White, -(float)Math.PI / 12f,      new Vector2(0f, 16f), 4f, SpriteEffects.FlipHorizontally, lay); break;
+                        case 2: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X - 60f, pos.Y -  68f + y)), src, Color.White, -(float)Math.PI / 4f,       new Vector2(0f, 16f), 4f, SpriteEffects.FlipHorizontally, lay); break;
+                        case 3: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X - 44f, pos.Y +  12f + y)), src, Color.White, -(float)Math.PI * 7f / 12f, new Vector2(0f, 16f), 4f, SpriteEffects.FlipHorizontally, lay); break;
+                        case 4: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X - 40f, pos.Y +  24f + y)), src, Color.White, -(float)Math.PI * 7f / 12f, new Vector2(0f, 16f), 4f, SpriteEffects.FlipHorizontally, lay); break;
+                    }
+                    break;
+                default: // up (0) / down (2)
+                    switch (anim)
+                    {
+                        case 0:
+                            if (dir == 0) b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X,        pos.Y - 136f + y)), src, Color.White, 0f,                   new Vector2(0f, 16f), 4f, SpriteEffects.None, lay);
+                            else          b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X - 20f,  pos.Y - 116f + y)), src, Color.White, 0f,                   new Vector2(0f, 16f), 4f, SpriteEffects.None, lay);
+                            break;
+                        case 1:
+                            if (dir == 0) b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X +  4f,  pos.Y -  88f + y)), src, Color.White, 0f,                   new Vector2(0f, 16f), 4f, SpriteEffects.None, lay);
+                            else          b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X - 12f,  pos.Y -  96f + y)), src, Color.White, -(float)Math.PI / 24f, new Vector2(0f, 16f), 4f, SpriteEffects.None, lay);
+                            break;
+                        case 2: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X,       pos.Y -  64f + y)), src, Color.White, 0f, new Vector2(0f, 16f), 4f, SpriteEffects.None, lay); break;
+                        case 3: if (dir != 0) b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X, pos.Y - 20f + y)), src, Color.White, 0f, new Vector2(0f, 16f), 4f, SpriteEffects.None, lay); break;
+                        case 4: if (dir != 0) b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X, pos.Y - 16f + y)), src, Color.White, 0f, new Vector2(0f, 16f), 4f, SpriteEffects.None, lay); break;
+                        case 5: b.Draw(sheet, Utility.snapToInt(new Vector2(pos.X,       pos.Y -  32f + y)), src, Color.White, 0f, new Vector2(0f, 16f), 4f, SpriteEffects.None, lay); break;
+                    }
+                    break;
+            }
+        }
+
         private void PlayDirectionAnimation(int direction)
         {
             int[] animations = { 176, 168, 160, 184 };
             if (direction >= 0 && direction < animations.Length)
-            {
                 Game1.player.FarmerSprite.animateOnce(animations[direction], 40, 8);
-            }
         }
     }
 }

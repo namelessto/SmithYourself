@@ -1,8 +1,8 @@
+using SmithYourself.Utils;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
-
-namespace SmithYourself.mod_utils.Editors
+namespace SmithYourself.Content.Editors
 {
     internal sealed class BootsEditor
     {
@@ -26,7 +26,6 @@ namespace SmithYourself.mod_utils.Editors
                 .Trim();
         }
 
-
         public void Edit(AssetRequestedEventArgs e)
         {
             e.Edit(edit =>
@@ -46,7 +45,6 @@ namespace SmithYourself.mod_utils.Editors
                     string displayName = SanitizeBootField(helper.Translation.Get(displayNameKey).ToString());
                     string description = SanitizeBootField(helper.Translation.Get(descriptionKey).ToString());
 
-                    // field #1 must be stable (NOT translated)
                     string internalName = fullId;
 
                     string bootData =
@@ -61,27 +59,18 @@ namespace SmithYourself.mod_utils.Editors
                         $"{boot.SpriteIndex}/" +
                         $"{Assets.GetBootsSheetAsset(manifest)}";
 
-
-                    // Validation.ValidateBootFields(monitor, fullId, bootData);
-
-                    // editor.Data[fullId] = bootData;
-
-
                     Validation.ValidateBootFields(monitor, fullId, bootData);
 
                     var parts = bootData.Split('/');
                     if (parts.Length != 10)
                     {
                         monitor.Log($"Boot entry broke slash format ({parts.Length} parts): {fullId} => {bootData}", LogLevel.Error);
-                        // don't add a broken entry
                         continue;
                     }
 
-                    // Optional: log what sheet/sprite the game will try to use
                     monitor.Log($"Boot OK: {fullId} sheet={parts[9]} sprite={parts[8]}", LogLevel.Trace);
 
                     editor.Data[fullId] = bootData;
-
                 }
             });
         }

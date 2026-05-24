@@ -1,7 +1,7 @@
 using StardewModdingAPI.Events;
 using StardewValley.GameData.Shops;
 
-namespace SmithYourself.mod_utils.Editors
+namespace SmithYourself.Content.Editors
 {
     internal sealed class ShopsEditor
     {

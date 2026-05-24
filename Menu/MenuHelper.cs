@@ -1,9 +1,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SmithYourself.Config;
+using SmithYourself.Core;
 using StardewModdingAPI;
 using StardewValley;
 
-namespace SmithYourself.mod_menu
+namespace SmithYourself.Menu
 {
     internal static class MenuMaterialHelpers
     {
@@ -40,12 +42,13 @@ namespace SmithYourself.mod_menu
             IModHelper helper,
             IManifest manifest,
             IGenericModConfigMenuApi menu,
+            ModConfig config,
             ToolType toolType,
             int tierKey,
             Func<string> tierLabel
         )
         {
-            var listNow = GetOrCreateTierList(toolType, tierKey);
+            var listNow = GetOrCreateTierList(config, toolType, tierKey);
             EnsureNonNullList(listNow);
 
             for (int i = 0; i < listNow.Count; i++)
@@ -55,28 +58,28 @@ namespace SmithYourself.mod_menu
                 menu.AddTextOption(
                     mod: manifest,
                     name: () => $"{tierLabel()} Item ID #{slot + 1}",
-                    getValue: () => GetOrCreateSlot(toolType, tierKey, slot).ItemId ?? "",
-                    setValue: v => GetOrCreateSlot(toolType, tierKey, slot).ItemId = (v ?? "").Trim()
+                    getValue: () => GetOrCreateSlot(config, toolType, tierKey, slot).ItemId ?? "",
+                    setValue: v => GetOrCreateSlot(config, toolType, tierKey, slot).ItemId = (v ?? "").Trim()
                 );
 
                 menu.AddNumberOption(
                     mod: manifest,
                     name: () => $"{tierLabel()} Amount #{slot + 1}",
-                    getValue: () => GetOrCreateSlot(toolType, tierKey, slot).Amount,
-                    setValue: v => GetOrCreateSlot(toolType, tierKey, slot).Amount = Math.Max(0, v),
+                    getValue: () => GetOrCreateSlot(config, toolType, tierKey, slot).Amount,
+                    setValue: v => GetOrCreateSlot(config, toolType, tierKey, slot).Amount = Math.Max(0, v),
                     min: 0
                 );
-
             }
+
             AddSeparator(menu, manifest);
         }
 
-        public static List<MaterialRequirement> GetOrCreateTierList(ToolType toolType, int tierKey)
+        public static List<MaterialRequirement> GetOrCreateTierList(ModConfig config, ToolType toolType, int tierKey)
         {
-            ModEntry.Config.UpgradeMaterials ??= new Dictionary<ToolType, Dictionary<int, List<MaterialRequirement>>>();
+            config.UpgradeMaterials ??= new Dictionary<ToolType, Dictionary<int, List<MaterialRequirement>>>();
 
-            if (!ModEntry.Config.UpgradeMaterials.TryGetValue(toolType, out var byTier) || byTier is null)
-                ModEntry.Config.UpgradeMaterials[toolType] = byTier = new Dictionary<int, List<MaterialRequirement>>();
+            if (!config.UpgradeMaterials.TryGetValue(toolType, out var byTier) || byTier is null)
+                config.UpgradeMaterials[toolType] = byTier = new Dictionary<int, List<MaterialRequirement>>();
 
             if (!byTier.TryGetValue(tierKey, out var list) || list is null)
                 byTier[tierKey] = list = new List<MaterialRequirement>();
@@ -85,9 +88,9 @@ namespace SmithYourself.mod_menu
             return list;
         }
 
-        public static MaterialRequirement GetOrCreateSlot(ToolType toolType, int tierKey, int slot)
+        public static MaterialRequirement GetOrCreateSlot(ModConfig config, ToolType toolType, int tierKey, int slot)
         {
-            var list = GetOrCreateTierList(toolType, tierKey);
+            var list = GetOrCreateTierList(config, toolType, tierKey);
             while (list.Count <= slot)
                 list.Add(new MaterialRequirement());
             list[slot] ??= new MaterialRequirement();

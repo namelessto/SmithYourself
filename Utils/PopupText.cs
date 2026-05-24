@@ -1,11 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
 
-namespace SmithYourself
+namespace SmithYourself.Utils
 {
     internal sealed class PopupText
     {
@@ -53,23 +53,21 @@ namespace SmithYourself
         private sealed class Popup
         {
             private readonly GameLocation _loc;
-            private Vector2 _pos; // world px
+            private Vector2 _pos;
             private Vector2 _vel;
-            private readonly float _life; // seconds
+            private readonly float _life;
             private float _age;
             private readonly string _text;
             private readonly Color _color;
             private readonly bool _crit;
 
-            // timings (tuned to feel like SV damage):
-            private const float POP_TIME = 0.10f;   // initial punch
-            private const float SETTLE_TIME = 0.18f; // settle after punch
-            private const float TOTAL_LIFE = 0.95f; // total duration
+            private const float POP_TIME = 0.10f;
+            private const float SETTLE_TIME = 0.18f;
+            private const float TOTAL_LIFE = 0.95f;
 
-            // motion
-            private const float START_VY = -95f; // initial upward speed (px/s)
-            private const float GRAV_Y = 85f;  // reduces rise quickly
-            private const float DAMP = 2.5f; // velocity damping
+            private const float START_VY = -95f;
+            private const float GRAV_Y = 85f;
+            private const float DAMP = 2.5f;
             private readonly float _wiggleFreq;
             private readonly float _wiggleAmp;
 
@@ -94,51 +92,27 @@ namespace SmithYourself
             {
                 _age += dt;
 
-                // expire if player changed locations
                 if (Game1.currentLocation != _loc) { _age = _life; return; }
 
-                // integrate: quick rise + heavy “gravity” + damping
                 _vel.Y += GRAV_Y * dt;
-                _vel *= (1f - DAMP * dt); // quick slowdown feels like SV
+                _vel *= (1f - DAMP * dt);
                 _pos += _vel * dt;
             }
 
             public void Draw(SpriteBatch sb)
             {
-                // world -> screen
                 Vector2 screen = Game1.GlobalToLocal(_pos);
 
-                // timing
                 float t = Math.Clamp(_age / _life, 0f, 1f);
 
-
-
-                // fade out only in the last ~30%
                 float alpha = t < 0.70f ? 1f : MathHelper.Lerp(1f, 0f, (t - 0.70f) / 0.30f);
 
-                // slight horizontal wiggle
                 screen.X += (float)Math.Sin(_age * _wiggleFreq) * _wiggleAmp;
 
-
-                // SpriteText handles outline/shadow automatically; choose a “darker” shadow by setting shadow=true
-                // var drawColor = _color * alpha;
-
-
-                // cycles automatically
                 Color drawColor = _color * alpha;
-                // Center text: SpriteText draws from top-left, so offset by half size.
-                // We estimate width/height via MeasureString on smallFont, close enough for centering.
 
-
-
-                // Draw! (outline/shadow via drawShadow=true)
-                // params: spriteBatch, text, x, y, characterLimit, width, drawShadow, scale, alpha, junimoText, color, ...
-                // world -> screen
                 screen = Game1.GlobalToLocal(_pos);
 
-                // same scale/alpha logic as you have...
-
-                // Draw horizontally centered text (with outline/shadow like damage numbers)
                 SpriteText.drawStringHorizontallyCenteredAt(
                     sb,
                     _text,
@@ -146,10 +120,8 @@ namespace SmithYourself
                     (int)screen.Y - 155,
                     color: drawColor
                 );
-
             }
 
-            // easing helpers
             private static float EaseOutBack(float x)
             {
                 const float c1 = 1.70158f;

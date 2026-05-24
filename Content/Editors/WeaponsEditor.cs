@@ -1,7 +1,8 @@
+using SmithYourself.Utils;
 using StardewModdingAPI.Events;
 using StardewValley.GameData.Weapons;
 
-namespace SmithYourself.mod_utils.Editors
+namespace SmithYourself.Content.Editors
 {
     internal sealed class WeaponsEditor
     {

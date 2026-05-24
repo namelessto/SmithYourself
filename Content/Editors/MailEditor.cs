@@ -1,6 +1,6 @@
 using StardewModdingAPI.Events;
 
-namespace SmithYourself.mod_utils.Editors
+namespace SmithYourself.Content.Editors
 {
     internal sealed class MailEditor
     {
@@ -19,11 +19,9 @@ namespace SmithYourself.mod_utils.Editors
             {
                 var editor = edit.AsDictionary<string, string>();
 
-                // existing anvil mail
                 editor.Data[Assets.GetAnvilMailId(manifest)] =
                     helper.Translation.Get("anvil.mail", new { item = Assets.GetBigCraftableId(manifest) });
 
-                // new boots mail
                 editor.Data[Assets.GetBootsMailId(manifest)] =
                     helper.Translation.Get("anvil.mail.boots", new { boots = $"{manifest.UniqueID}.weathered_boots" });
             });

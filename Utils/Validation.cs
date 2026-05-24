@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 
-namespace SmithYourself.mod_utils
+namespace SmithYourself.Utils
 {
     internal static class Validation
     {
